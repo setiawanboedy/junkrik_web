@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export interface CreateScheduleRequest {
   dayOfWeek: number; // 0=Sunday, 1=Monday, etc.
   time: string; // Format: "HH:MM"

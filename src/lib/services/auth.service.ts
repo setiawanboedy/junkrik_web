@@ -1,7 +1,7 @@
 import prisma from '@/lib/prisma';
 import { hashPassword, comparePassword } from '@/lib/password';
 import { generateToken } from '@/lib/jwt';
-import { RegisterRequest, LoginRequest, AuthResponse, AuthValidationError } from '@/lib/validations/auth';
+import { RegisterRequest, LoginRequest, AuthResponse } from '@/lib/validations/auth';
 
 export class UserExistsError extends Error {
   constructor(message: string = 'User already exists') {

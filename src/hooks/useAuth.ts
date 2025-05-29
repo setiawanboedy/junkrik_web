@@ -1,0 +1,160 @@
+// Custom hook untuk authentication logic
+import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import { LoginRequest, RegisterRequest } from '@/lib/validations/auth';
+
+interface User {
+  id: string;
+  email: string;
+  businessName: string;
+}
+
+interface AuthState {
+  user: User | null;
+  loading: boolean;
+  error: string | null;
+}
+
+interface UseAuthReturn extends AuthState {
+  login: (credentials: LoginRequest) => Promise<boolean>;
+  logout: () => void;
+  clearError: () => void;
+  isAuthenticated: boolean;
+  register: (data: RegisterRequest) => Promise<boolean>;
+}
+
+export const useAuth = (): UseAuthReturn => {
+  const router = useRouter();
+  const [state, setState] = useState<AuthState>({
+    user: null,
+    loading: true,
+    error: null,
+  });
+
+  const checkAuthStatus = useCallback(() => {
+    try {
+      const token = localStorage.getItem('token');
+      const userData = localStorage.getItem('user');
+
+      if (token && userData) {
+        const user = JSON.parse(userData);
+        setState(prev => ({ ...prev, user, loading: false }));
+      } else {
+        setState(prev => ({ ...prev, user: null, loading: false }));
+      }
+    } catch (error) {
+      console.error('Error checking auth status:', error);
+      setState(prev => ({ ...prev, user: null, loading: false, error: 'Invalid session data' }));
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+    }
+  }, []);
+
+  // Check authentication status on mount
+  useEffect(() => {
+    checkAuthStatus();
+  }, [checkAuthStatus]);
+
+  const login = useCallback(async (credentials: LoginRequest): Promise<boolean> => {
+    setState(prev => ({ ...prev, loading: true, error: null }));
+
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(credentials),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Store token and user data
+        localStorage.setItem('token', data.data.token);
+        localStorage.setItem('user', JSON.stringify(data.data.user));
+        
+        setState(prev => ({ 
+          ...prev, 
+          user: data.data.user, 
+          loading: false,
+          error: null 
+        }));
+        
+        return true;
+      } else {
+        setState(prev => ({ 
+          ...prev, 
+          loading: false, 
+          error: data.error || 'Login failed' 
+        }));
+        return false;
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Network error occurred';
+      setState(prev => ({ 
+        ...prev, 
+        loading: false, 
+        error: errorMessage 
+      }));
+      return false;
+    }
+  }, []);
+
+  const register = useCallback(async (registerData: RegisterRequest): Promise<boolean> => {
+    setState(prev => ({ ...prev, loading: true, error: null }));
+
+    try {
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(registerData),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setState(prev => ({ 
+          ...prev, 
+          loading: false,
+          error: null 
+        }));
+        
+        return true;
+      } else {
+        setState(prev => ({ 
+          ...prev, 
+          loading: false, 
+          error: data.error || 'Registration failed' 
+        }));
+        return false;
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Network error occurred';
+      setState(prev => ({ 
+        ...prev, 
+        loading: false, 
+        error: errorMessage 
+      }));
+      return false;
+    }
+  }, []);
+
+  const logout = useCallback(() => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setState({ user: null, loading: false, error: null });
+    router.push('/auth/login');
+  }, [router]);
+
+  const clearError = useCallback(() => {
+    setState(prev => ({ ...prev, error: null }));
+  }, []);
+
+  return {
+    ...state,
+    login,
+    logout,
+    clearError,
+    isAuthenticated: !!state.user,
+    register,
+  };
+};

@@ -1,9 +1,8 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
+import type { NextApiResponse } from 'next';
 import { ScheduleService } from '@/lib/services/schedule.service';
 import { validateUpdateSchedule } from '@/lib/validations/schedule';
 import { withAuth, AuthenticatedRequest } from '@/lib/middleware/auth';
 import { validateMethod, handleApiError, createSuccessResponse } from '@/lib/utils/api';
-import { ValidationError } from '@/lib/utils/api';
 
 async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
   // Validate HTTP method

@@ -1,4 +1,4 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
+import type { NextApiResponse } from 'next';
 import { ReportService } from '@/lib/services/report.service';
 import { PickupService } from '@/lib/services/pickup.service';
 import { ScheduleService } from '@/lib/services/schedule.service';

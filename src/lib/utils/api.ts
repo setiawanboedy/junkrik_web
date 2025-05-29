@@ -7,6 +7,42 @@ export interface ApiResponse<T = any> {
   message?: string;
 }
 
+// Custom Error Classes
+export class ValidationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ValidationError';
+  }
+}
+
+export class NotFoundError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'NotFoundError';
+  }
+}
+
+export class AuthValidationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'AuthValidationError';
+  }
+}
+
+export class UserExistsError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'UserExistsError';
+  }
+}
+
+export class InvalidCredentialsError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'InvalidCredentialsError';
+  }
+}
+
 export function createSuccessResponse<T>(data: T, message?: string): ApiResponse<T> {
   return {
     success: true,
@@ -15,7 +51,7 @@ export function createSuccessResponse<T>(data: T, message?: string): ApiResponse
   };
 }
 
-export function createErrorResponse(error: string, statusCode?: number): ApiResponse {
+export function createErrorResponse(error: string): ApiResponse {
   return {
     success: false,
     error
@@ -30,6 +66,12 @@ export function handleApiError(
 
   if (error instanceof Error) {
     switch (error.name) {
+      case 'ValidationError':
+        res.status(400).json(createErrorResponse(error.message));
+        break;
+      case 'NotFoundError':
+        res.status(404).json(createErrorResponse(error.message));
+        break;
       case 'AuthValidationError':
         res.status(400).json(createErrorResponse(error.message));
         break;

@@ -1,4 +1,4 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
+import type { NextApiResponse } from 'next';
 import { ScheduleService } from '@/lib/services/schedule.service';
 import { validateCreateSchedule } from '@/lib/validations/schedule';
 import { withAuth, AuthenticatedRequest } from '@/lib/middleware/auth';

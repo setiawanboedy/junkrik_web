@@ -61,9 +61,15 @@ export class PickupService {
     status?: string;
     startDate?: string;
     endDate?: string;
-  } = {}) {
-    try {
-      const whereClause: any = {
+  } = {}) {    try {
+      const whereClause: {
+        userId: string;
+        status?: string;
+        pickupDate?: {
+          gte?: Date;
+          lte?: Date;
+        };
+      } = {
         userId: userId
       };
 
@@ -101,7 +107,7 @@ export class PickupService {
       });
 
       return pickups;
-    } catch (error) {
+    } catch {
       throw new Error('Failed to fetch pickups');
     }
   }
@@ -230,9 +236,7 @@ export class PickupService {
           status: 'CANCELLED',
           updatedAt: new Date()
         }
-      });
-
-      return true;
+      });      return true;
     } catch (error) {
       if (error instanceof ValidationError || error instanceof NotFoundError) {
         throw error;
@@ -277,15 +281,13 @@ export class PickupService {
             actualWeight: true
           }
         })
-      ]);
-
-      return {
+      ]);      return {
         totalPickups,
         pendingPickups,
         completedPickups,
         totalWeight: totalWeight._sum.actualWeight || 0
       };
-    } catch (error) {
+    } catch {
       throw new Error('Failed to fetch pickup statistics');
     }
   }

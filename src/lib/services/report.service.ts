@@ -87,9 +87,7 @@ export class ReportService {
             }
           }
         }
-      });
-
-      return report;
+      });      return report;
     } catch (error) {
       if (error instanceof ValidationError) {
         throw error;
@@ -103,9 +101,13 @@ export class ReportService {
     year?: number;
     month?: number;
     type?: string;
-  } = {}) {
-    try {
-      const whereClause: any = {
+  } = {}) {    try {
+      const whereClause: {
+        userId: string;
+        year?: number;
+        month?: number;
+        type?: string;
+      } = {
         userId: userId
       };
 
@@ -135,10 +137,8 @@ export class ReportService {
           { year: 'desc' },
           { month: 'desc' }
         ]
-      });
-
-      return reports;
-    } catch (error) {
+      });      return reports;
+    } catch {
       throw new Error('Failed to fetch reports');
     }
   }
@@ -166,8 +166,7 @@ export class ReportService {
         throw new NotFoundError('Report not found');
       }
 
-      return report;
-    } catch (error) {
+      return report;    } catch (error) {
       if (error instanceof NotFoundError) {
         throw error;
       }
@@ -268,8 +267,7 @@ export class ReportService {
           )
         },
         yearToDate: yearToDateTotals
-      };
-    } catch (error) {
+      };    } catch {
       throw new Error('Failed to fetch dashboard analytics');
     }
   }

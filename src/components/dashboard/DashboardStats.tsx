@@ -222,7 +222,7 @@ export default function DashboardStats() {
                 <span className="font-semibold text-gray-900">{analytics.schedules.totalSchedules}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Today's Pickups</span>
+                <span className="text-gray-600">Today&apos;s Pickups</span>
                 <span className="font-semibold text-blue-600">{analytics.schedules.todaysPickups}</span>
               </div>
             </div>

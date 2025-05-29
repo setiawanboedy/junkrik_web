@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 
 interface Pickup {
@@ -49,11 +49,7 @@ export default function PickupList() {
   const [error, setError] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
 
-  useEffect(() => {
-    fetchPickups();
-  }, [statusFilter]);
-
-  const fetchPickups = async () => {
+  const fetchPickups = useCallback(async () => {
     try {
       const queryParams = new URLSearchParams();
       if (statusFilter) queryParams.append('status', statusFilter);
@@ -64,12 +60,15 @@ export default function PickupList() {
       }
       const data = await response.json();
       setPickups(data.data || []);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+    } catch (err) {      setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setLoading(false);
     }
-  };
+  }, [statusFilter]);
+
+  useEffect(() => {
+    fetchPickups();
+  }, [fetchPickups]);
 
   const handleCancel = async (pickupId: string) => {
     if (!confirm('Are you sure you want to cancel this pickup?')) {

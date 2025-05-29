@@ -1,205 +1,232 @@
 'use client';
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuth';
+import { useForm } from '@/hooks/useForm';
+import { RegisterRequest } from '@/lib/validations/auth';
+import { 
+  FormContainer, 
+  InputField, 
+  TextAreaField,
+  SelectField,
+  SubmitButton, 
+  ErrorAlert 
+} from '@/components/ui/FormComponents';
+
+// Form data interface (all strings from form inputs)
+interface RegisterFormData {
+  businessName: string;
+  email: string;
+  password: string;
+  phone: string;
+  address: string;
+  wasteType: string;
+  wasteVolume: string;
+  [key: string]: unknown;
+}
+
+// Waste type options
+const wasteTypeOptions = [
+  { value: 'plastik', label: 'Plastik' },
+  { value: 'organik', label: 'Organik' },
+  { value: 'kertas', label: 'Kertas' },
+  { value: 'logam', label: 'Logam' },
+  { value: 'campuran', label: 'Campuran' },
+];
+
+// Form validation rules
+const validationRules = {
+  businessName: {
+    required: true,
+    minLength: 2,
+  },
+  email: {
+    required: true,
+    pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+  },
+  password: {
+    required: true,
+    minLength: 6,
+  },
+  phone: {
+    required: true,
+    pattern: /^[0-9+\-\s()]+$/,
+  },
+  address: {
+    required: true,
+    minLength: 10,
+  },  wasteVolume: {
+    custom: (value: unknown) => {
+      if (value === '' || value === null || value === undefined) {
+        return null; // Optional field
+      }
+      const numValue = typeof value === 'string' ? Number(value) : value;
+      if (isNaN(numValue as number)) {
+        return 'Volume harus berupa angka';
+      }
+      if ((numValue as number) <= 0) {
+        return 'Volume harus lebih dari 0';
+      }
+      return null;
+    },
+  },
+};
 
 export default function RegisterPage() {
   const router = useRouter();
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    businessName: '',
-    address: '',
-    phone: '',
-    wasteType: '',
-    wasteVolume: '',
-  });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const { register, loading, error, clearError } = useAuth();
+    const {
+    values,
+    errors,
+    touched,
+    isSubmitting,
+    handleChange,
+    handleBlur,
+    handleSubmit,
+  } = useForm<RegisterFormData>(
+    {
+      businessName: '',
+      email: '',
+      password: '',
+      phone: '',
+      address: '',
+      wasteType: '',
+      wasteVolume: '',
+    },
+    validationRules
+  );
+  const onSubmit = async (formData: RegisterFormData) => {
+    // Convert form data to RegisterRequest format
+    const registerData: RegisterRequest = {
+      businessName: formData.businessName,
+      email: formData.email,
+      password: formData.password,
+      phone: formData.phone,
+      address: formData.address,
+      wasteType: formData.wasteType || undefined,
+      wasteVolume: formData.wasteVolume ? Number(formData.wasteVolume) : undefined,
+    };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-
-    try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        alert('Registrasi berhasil! Silakan login.');
-        router.push('/auth/login');
-      } else {
-        setError(data.error || 'Registrasi gagal');
-      }
-    } catch (error) {
-      setError('Terjadi kesalahan. Silakan coba lagi.');
-    } finally {
-      setLoading(false);
+    const success = await register(registerData);
+    if (success) {
+      alert('Registrasi berhasil! Silakan login.');
+      router.push('/auth/login');
     }
   };
-
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Daftar Bisnis Junkrik
-        </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
-          Solusi pengelolaan sampah untuk bisnis Anda
+    <FormContainer
+      title="Daftar Bisnis Junkrik"
+      subtitle="Solusi pengelolaan sampah untuk bisnis Anda"
+      onSubmit={handleSubmit(onSubmit)}
+    >
+      {error && (
+        <ErrorAlert error={error} onDismiss={clearError} />
+      )}
+
+      <InputField
+        id="businessName"
+        name="businessName"
+        type="text"
+        label="Nama Bisnis"
+        value={values.businessName}
+        error={errors.businessName}
+        touched={touched.businessName}
+        required
+        onChange={handleChange}
+        onBlur={handleBlur}
+      />
+
+      <InputField
+        id="email"
+        name="email"
+        type="email"
+        label="Email"
+        value={values.email}
+        error={errors.email}
+        touched={touched.email}
+        required
+        onChange={handleChange}
+        onBlur={handleBlur}
+      />
+
+      <InputField
+        id="password"
+        name="password"
+        type="password"
+        label="Password"
+        value={values.password}
+        error={errors.password}
+        touched={touched.password}
+        required
+        onChange={handleChange}
+        onBlur={handleBlur}
+      />
+
+      <InputField
+        id="phone"
+        name="phone"
+        type="tel"
+        label="Nomor Telepon"
+        value={values.phone}
+        error={errors.phone}
+        touched={touched.phone}
+        required
+        onChange={handleChange}
+        onBlur={handleBlur}
+      />
+
+      <TextAreaField
+        id="address"
+        name="address"
+        label="Alamat"
+        value={values.address}
+        error={errors.address}
+        touched={touched.address}
+        required
+        rows={3}
+        onChange={handleChange}
+        onBlur={handleBlur}
+      />
+
+      <SelectField
+        id="wasteType"
+        name="wasteType"
+        label="Jenis Sampah Utama"
+        value={values.wasteType || ''}
+        error={errors.wasteType}
+        touched={touched.wasteType}
+        options={wasteTypeOptions}
+        placeholder="Pilih jenis sampah"
+        onChange={handleChange}
+        onBlur={handleBlur}
+      />      <InputField
+        id="wasteVolume"
+        name="wasteVolume"
+        type="number"
+        label="Volume Sampah per Hari (kg)"
+        value={values.wasteVolume || ''}
+        error={errors.wasteVolume}
+        touched={touched.wasteVolume}
+        placeholder="Contoh: 50"
+        onChange={handleChange}
+        onBlur={handleBlur}
+      />
+
+      <SubmitButton
+        loading={loading || isSubmitting}
+        className="w-full"
+      >
+        {loading || isSubmitting ? 'Mendaftar...' : 'Daftar'}
+      </SubmitButton>
+
+      <div className="text-center">
+        <p className="text-sm text-gray-600">
+          Sudah punya akun?{' '}
+          <a href="/auth/login" className="font-medium text-green-600 hover:text-green-500">
+            Login di sini
+          </a>
         </p>
       </div>
-
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded">
-                {error}
-              </div>
-            )}
-
-            <div>
-              <label htmlFor="businessName" className="block text-sm font-medium text-gray-700">
-                Nama Bisnis
-              </label>
-              <input
-                id="businessName"
-                name="businessName"
-                type="text"
-                required
-                value={formData.businessName}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-green-500 focus:border-green-500"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                value={formData.email}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-green-500 focus:border-green-500"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                value={formData.password}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-green-500 focus:border-green-500"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-                Nomor Telepon
-              </label>
-              <input
-                id="phone"
-                name="phone"
-                type="tel"
-                required
-                value={formData.phone}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-green-500 focus:border-green-500"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="address" className="block text-sm font-medium text-gray-700">
-                Alamat
-              </label>
-              <textarea
-                id="address"
-                name="address"
-                required
-                value={formData.address}
-                onChange={handleChange}
-                rows={3}
-                className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-green-500 focus:border-green-500"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="wasteType" className="block text-sm font-medium text-gray-700">
-                Jenis Sampah Utama
-              </label>
-              <select
-                id="wasteType"
-                name="wasteType"
-                value={formData.wasteType}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-green-500 focus:border-green-500"
-              >
-                <option value="">Pilih jenis sampah</option>
-                <option value="plastik">Plastik</option>
-                <option value="organik">Organik</option>
-                <option value="kertas">Kertas</option>
-                <option value="logam">Logam</option>
-                <option value="campuran">Campuran</option>
-              </select>
-            </div>
-
-            <div>
-              <label htmlFor="wasteVolume" className="block text-sm font-medium text-gray-700">
-                Volume Sampah per Hari (kg)
-              </label>
-              <input
-                id="wasteVolume"
-                name="wasteVolume"
-                type="number"
-                min="1"
-                value={formData.wasteVolume}
-                onChange={handleChange}
-                placeholder="Contoh: 50"
-                className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-green-500 focus:border-green-500"
-              />
-            </div>
-
-            <div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50"
-              >
-                {loading ? 'Mendaftar...' : 'Daftar'}
-              </button>
-            </div>
-
-            <div className="text-center">
-              <p className="text-sm text-gray-600">
-                Sudah punya akun?{' '}
-                <a href="/auth/login" className="font-medium text-green-600 hover:text-green-500">
-                  Login di sini
-                </a>
-              </p>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
+    </FormContainer>
   );
 }

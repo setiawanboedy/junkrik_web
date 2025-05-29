@@ -38,7 +38,6 @@ export class ScheduleService {
       orderBy: { dayOfWeek: 'asc' }
     });
   }
-
   /**
    * Get active schedules for user
    */
@@ -50,6 +49,24 @@ export class ScheduleService {
       },
       orderBy: { dayOfWeek: 'asc' }
     });
+  }
+
+  /**
+   * Get schedule by ID for user
+   */
+  static async getScheduleById(scheduleId: string, userId: string) {
+    const schedule = await prisma.schedule.findFirst({
+      where: { 
+        id: scheduleId,
+        userId
+      }
+    });
+
+    if (!schedule) {
+      throw new Error('Schedule not found');
+    }
+
+    return schedule;
   }
 
   /**
@@ -110,56 +127,7 @@ export class ScheduleService {
       where: { id: scheduleId }
     });
   }
-
   /**
-   * Generate upcoming pickups based on schedules
-   */
-  static async generateUpcomingPickups(userId: string, daysAhead: number = 7) {
-    const activeSchedules = await this.getActiveSchedules(userId);
-    const today = new Date();
-    const pickups = [];
-
-    for (let i = 0; i < daysAhead; i++) {
-      const date = new Date(today);
-      date.setDate(today.getDate() + i);
-      const dayOfWeek = date.getDay();
-
-      const schedule = activeSchedules.find(s => s.dayOfWeek === dayOfWeek);
-      if (schedule) {
-        // Check if pickup already exists for this date
-        const existingPickup = await prisma.pickup.findFirst({
-          where: {
-            scheduleId: schedule.id,
-            scheduledDate: {
-              gte: new Date(date.getFullYear(), date.getMonth(), date.getDate()),
-              lt: new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1)
-            }
-          }
-        });
-
-        if (!existingPickup) {
-          const [hours, minutes] = schedule.time.split(':');
-          const scheduledDateTime = new Date(date);
-          scheduledDateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
-
-          const pickup = await prisma.pickup.create({
-            data: {
-              scheduleId: schedule.id,
-              scheduledDate: scheduledDateTime,
-              status: 'scheduled'
-            },
-            include: {
-              schedule: true
-            }
-          });
-
-          pickups.push(pickup);
-        }
-      }
-    }
-
-    return pickups;
-  }  /**
    * Get schedule statistics for dashboard
    */
   static async getScheduleStats(userId: string) {
@@ -178,13 +146,11 @@ export class ScheduleService {
           }
         }),
         
-        // Today's scheduled pickups
+        // Today's pickups
         prisma.pickup.count({
           where: { 
-            schedule: {
-              userId: userId
-            },
-            scheduledDate: {
+            userId: userId,
+            createdAt: {
               gte: new Date(new Date().setHours(0, 0, 0, 0)),
               lt: new Date(new Date().setHours(23, 59, 59, 999))
             }

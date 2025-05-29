@@ -8,11 +8,13 @@ export interface RegisterRequest {
   wasteType?: string;
   wasteVolume?: number;
   role?: string;
+  [key: string]: unknown;
 }
 
 export interface LoginRequest {
   email: string;
   password: string;
+  [key: string]: unknown;
 }
 
 export interface AuthResponse {
@@ -31,10 +33,14 @@ export class AuthValidationError extends Error {
   }
 }
 
-export function validateRegisterInput(data: any): RegisterRequest {
-  const { email, password, businessName, address, phone, wasteType, wasteVolume, role } = data;
+export function validateRegisterInput(data: unknown): RegisterRequest {
+  const validData = data as Record<string, unknown>;
+  const { email, password, businessName, address, phone, wasteType, wasteVolume, role } = validData;
 
-  if (!email || !password || !businessName || !address || !phone) {
+  if (!email || typeof email !== 'string' || !password || typeof password !== 'string' || 
+      !businessName || typeof businessName !== 'string' || 
+      !address || typeof address !== 'string' || 
+      !phone || typeof phone !== 'string') {
     throw new AuthValidationError('Email, password, business name, address, and phone are required');
   }
 
@@ -52,16 +58,17 @@ export function validateRegisterInput(data: any): RegisterRequest {
     businessName: businessName.trim(),
     address: address.trim(),
     phone: phone.trim(),
-    wasteType: wasteType?.trim(),
-    wasteVolume: wasteVolume ? parseInt(wasteVolume) : undefined,
-    role: role || 'business'
+    wasteType: typeof wasteType === 'string' ? wasteType.trim() : undefined,
+    wasteVolume: typeof wasteVolume === 'string' ? parseInt(wasteVolume) : typeof wasteVolume === 'number' ? wasteVolume : undefined,
+    role: typeof role === 'string' ? role : 'business'
   };
 }
 
-export function validateLoginInput(data: any): LoginRequest {
-  const { email, password } = data;
+export function validateLoginInput(data: unknown): LoginRequest {
+  const validData = data as Record<string, unknown>;
+  const { email, password } = validData;
 
-  if (!email || !password) {
+  if (!email || typeof email !== 'string' || !password || typeof password !== 'string') {
     throw new AuthValidationError('Email and password are required');
   }
 

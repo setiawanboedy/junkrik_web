@@ -1,4 +1,4 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
+import type { NextApiResponse } from 'next';
 import { PickupService } from '@/lib/services/pickup.service';
 import { validateCreatePickup } from '@/lib/validations/pickup';
 import { withAuth, AuthenticatedRequest } from '@/lib/middleware/auth';

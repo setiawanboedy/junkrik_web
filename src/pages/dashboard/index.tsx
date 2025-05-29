@@ -118,16 +118,14 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         permanent: false,
       },
     };
-  }
-
-  try {
+  }  try {
     const user = verifyJWT(token);
     return {
       props: {
         user,
       },
     };
-  } catch (error) {
+  } catch {
     return {
       redirect: {
         destination: '/auth/login',

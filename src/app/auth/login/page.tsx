@@ -1,123 +1,102 @@
 'use client';
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuth';
+import { useForm } from '@/hooks/useForm';
+import { LoginRequest } from '@/lib/validations/auth';
+import { 
+  FormContainer, 
+  InputField, 
+  SubmitButton, 
+  ErrorAlert 
+} from '@/components/ui/FormComponents';
+
+// Form validation rules
+const validationRules = {
+  email: {
+    required: true,
+    pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+  },
+  password: {
+    required: true,
+    minLength: 6,
+  },
+};
 
 export default function LoginPage() {
   const router = useRouter();
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-  });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const { login, loading, error, clearError } = useAuth();
+  
+  const {
+    values,
+    errors,
+    touched,
+    isSubmitting,
+    handleChange,
+    handleBlur,
+    handleSubmit,
+  } = useForm<LoginRequest>(
+    { email: '', password: '' },
+    validationRules
+  );
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-
-    try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        // Simpan token ke localStorage
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
-        
-        alert('Login berhasil!');
-        router.push('/dashboard');
-      } else {
-        setError(data.error || 'Login gagal');
-      }
-    } catch (error) {
-      setError('Terjadi kesalahan. Silakan coba lagi.');
-    } finally {
-      setLoading(false);
+  const onSubmit = async (formData: LoginRequest) => {
+    const success = await login(formData);
+    if (success) {
+      router.push('/dashboard');
     }
   };
-
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Login Junkrik
-        </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
-          Masuk ke akun bisnis Anda
+    <FormContainer
+      title="Login Junkrik"
+      subtitle="Masuk ke akun bisnis Anda"
+      onSubmit={handleSubmit(onSubmit)}
+    >
+      {error && (
+        <ErrorAlert error={error} onDismiss={clearError} />
+      )}
+
+      <InputField
+        id="email"
+        name="email"
+        type="email"
+        label="Email"
+        value={values.email}
+        error={errors.email}
+        touched={touched.email}
+        required
+        onChange={handleChange}
+        onBlur={handleBlur}
+      />
+
+      <InputField
+        id="password"
+        name="password"
+        type="password"
+        label="Password"
+        value={values.password}
+        error={errors.password}
+        touched={touched.password}
+        required
+        onChange={handleChange}
+        onBlur={handleBlur}
+      />
+
+      <SubmitButton
+        loading={loading || isSubmitting}
+        className="w-full"
+      >
+        {loading || isSubmitting ? 'Masuk...' : 'Masuk'}
+      </SubmitButton>
+
+      <div className="text-center">
+        <p className="text-sm text-gray-600">
+          Belum punya akun?{' '}
+          <a href="/auth/register" className="font-medium text-green-600 hover:text-green-500">
+            Daftar di sini
+          </a>
         </p>
       </div>
-
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded">
-                {error}
-              </div>
-            )}
-
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                value={formData.email}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-green-500 focus:border-green-500"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                value={formData.password}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-green-500 focus:border-green-500"
-              />
-            </div>
-
-            <div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50"
-              >
-                {loading ? 'Masuk...' : 'Masuk'}
-              </button>
-            </div>
-
-            <div className="text-center">
-              <p className="text-sm text-gray-600">
-                Belum punya akun?{' '}
-                <a href="/auth/register" className="font-medium text-green-600 hover:text-green-500">
-                  Daftar di sini
-                </a>
-              </p>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
+    </FormContainer>
   );
 }
