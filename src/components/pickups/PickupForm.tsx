@@ -1,0 +1,315 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+
+interface Schedule {
+  id: string;
+  dayOfWeek: number;
+  time: string;
+}
+
+interface PickupFormData {
+  scheduleId?: string;
+  pickupDate: string;
+  wasteTypes: string[];
+  estimatedWeight?: number;
+  specialInstructions?: string;
+  address: {
+    street: string;
+    city: string;
+    postalCode: string;
+    notes?: string;
+  };
+}
+
+const WASTE_TYPES = [
+  { value: 'PLASTIC', label: 'Plastic' },
+  { value: 'ORGANIC', label: 'Organic' },
+  { value: 'PAPER', label: 'Paper' },
+  { value: 'METAL', label: 'Metal' },
+  { value: 'GLASS', label: 'Glass' },
+  { value: 'MIXED', label: 'Mixed' }
+];
+
+const DAYS_OF_WEEK = [
+  'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'
+];
+
+export default function PickupForm() {
+  const router = useRouter();
+  const [schedules, setSchedules] = useState<Schedule[]>([]);
+  const [formData, setFormData] = useState<PickupFormData>({
+    pickupDate: '',
+    wasteTypes: [],
+    address: {
+      street: '',
+      city: '',
+      postalCode: ''
+    }
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    fetchSchedules();
+    // Set default pickup date to tomorrow
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    setFormData(prev => ({
+      ...prev,
+      pickupDate: tomorrow.toISOString().slice(0, 16)
+    }));
+  }, []);
+
+  const fetchSchedules = async () => {
+    try {
+      const response = await fetch('/api/schedules');
+      if (response.ok) {
+        const data = await response.json();
+        setSchedules(data.data || []);
+      }
+    } catch (err) {
+      console.error('Failed to fetch schedules:', err);
+    }
+  };
+
+  const handleWasteTypeToggle = (wasteType: string) => {
+    setFormData(prev => ({
+      ...prev,
+      wasteTypes: prev.wasteTypes.includes(wasteType)
+        ? prev.wasteTypes.filter(type => type !== wasteType)
+        : [...prev.wasteTypes, wasteType]
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (formData.wasteTypes.length === 0) {
+      setError('Please select at least one waste type');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch('/api/pickups', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create pickup request');
+      }
+
+      router.push('/dashboard/pickups');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6">
+      <h2 className="text-2xl font-bold text-gray-900 mb-6">Request Pickup</h2>
+
+      {error && (
+        <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+          {error}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Schedule Selection */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Link to Schedule (Optional)
+          </label>
+          <select
+            value={formData.scheduleId || ''}
+            onChange={(e) => setFormData({ ...formData, scheduleId: e.target.value || undefined })}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+          >
+            <option value="">No schedule (one-time pickup)</option>
+            {schedules.map((schedule) => (
+              <option key={schedule.id} value={schedule.id}>
+                {DAYS_OF_WEEK[schedule.dayOfWeek]} at {schedule.time}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Pickup Date */}
+        <div>
+          <label htmlFor="pickupDate" className="block text-sm font-medium text-gray-700 mb-2">
+            Pickup Date & Time *
+          </label>
+          <input
+            type="datetime-local"
+            id="pickupDate"
+            value={formData.pickupDate}
+            onChange={(e) => setFormData({ ...formData, pickupDate: e.target.value })}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+            required
+          />
+        </div>
+
+        {/* Waste Types */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Waste Types *
+          </label>
+          <div className="grid grid-cols-2 gap-3">
+            {WASTE_TYPES.map((type) => (
+              <label key={type.value} className="flex items-center space-x-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.wasteTypes.includes(type.value)}
+                  onChange={() => handleWasteTypeToggle(type.value)}
+                  className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                />
+                <span className="text-sm text-gray-700">{type.label}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        {/* Estimated Weight */}
+        <div>
+          <label htmlFor="estimatedWeight" className="block text-sm font-medium text-gray-700 mb-2">
+            Estimated Weight (kg)
+          </label>
+          <input
+            type="number"
+            id="estimatedWeight"
+            value={formData.estimatedWeight || ''}
+            onChange={(e) => setFormData({ ...formData, estimatedWeight: e.target.value ? parseFloat(e.target.value) : undefined })}
+            placeholder="e.g., 10"
+            min="0"
+            step="0.1"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+          />
+        </div>
+
+        {/* Address */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium text-gray-900">Pickup Address</h3>
+          
+          <div>
+            <label htmlFor="street" className="block text-sm font-medium text-gray-700 mb-2">
+              Street Address *
+            </label>
+            <input
+              type="text"
+              id="street"
+              value={formData.address.street}
+              onChange={(e) => setFormData({
+                ...formData,
+                address: { ...formData.address, street: e.target.value }
+              })}
+              placeholder="e.g., Jl. Sudirman No. 123"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+              required
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-2">
+                City *
+              </label>
+              <input
+                type="text"
+                id="city"
+                value={formData.address.city}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  address: { ...formData.address, city: e.target.value }
+                })}
+                placeholder="e.g., Jakarta"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="postalCode" className="block text-sm font-medium text-gray-700 mb-2">
+                Postal Code *
+              </label>
+              <input
+                type="text"
+                id="postalCode"
+                value={formData.address.postalCode}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  address: { ...formData.address, postalCode: e.target.value }
+                })}
+                placeholder="e.g., 12345"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                required
+              />
+            </div>
+          </div>
+
+          <div>
+            <label htmlFor="addressNotes" className="block text-sm font-medium text-gray-700 mb-2">
+              Address Notes
+            </label>
+            <input
+              type="text"
+              id="addressNotes"
+              value={formData.address.notes || ''}
+              onChange={(e) => setFormData({
+                ...formData,
+                address: { ...formData.address, notes: e.target.value }
+              })}
+              placeholder="e.g., Building A, 2nd floor"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+            />
+          </div>
+        </div>
+
+        {/* Special Instructions */}
+        <div>
+          <label htmlFor="specialInstructions" className="block text-sm font-medium text-gray-700 mb-2">
+            Special Instructions
+          </label>
+          <textarea
+            id="specialInstructions"
+            value={formData.specialInstructions || ''}
+            onChange={(e) => setFormData({ ...formData, specialInstructions: e.target.value })}
+            placeholder="Any special instructions for the pickup team..."
+            rows={3}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+          />
+        </div>
+
+        {/* Submit Buttons */}
+        <div className="flex gap-3 pt-4">
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500"
+            disabled={loading}
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={loading}
+            className="flex-1 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? 'Creating...' : 'Request Pickup'}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
