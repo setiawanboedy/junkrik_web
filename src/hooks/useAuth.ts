@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // Custom hook untuk authentication logic
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { LoginRequest, RegisterRequest } from '@/lib/validations/auth';
+import api from '@/lib/utils/apiClient';
 
 interface User {
   id: string;
@@ -27,73 +29,30 @@ export const useAuth = (): UseAuthReturn => {
   const router = useRouter();
   const [state, setState] = useState<AuthState>({
     user: null,
-    loading: true,
+    loading: false, // Mulai dengan false agar tombol tidak loading sebelum aksi
     error: null,
   });
 
-  const checkAuthStatus = useCallback(() => {
-    try {
-      const token = localStorage.getItem('token');
-      const userData = localStorage.getItem('user');
 
-      if (token && userData) {
-        const user = JSON.parse(userData);
-        setState(prev => ({ ...prev, user, loading: false }));
-      } else {
-        setState(prev => ({ ...prev, user: null, loading: false }));
-      }
-    } catch (error) {
-      console.error('Error checking auth status:', error);
-      setState(prev => ({ ...prev, user: null, loading: false, error: 'Invalid session data' }));
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-    }
-  }, []);
-
-  // Check authentication status on mount
-  useEffect(() => {
-    checkAuthStatus();
-  }, [checkAuthStatus]);
 
   const login = useCallback(async (credentials: LoginRequest): Promise<boolean> => {
     setState(prev => ({ ...prev, loading: true, error: null }));
-
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(credentials),
-      });      const data = await response.json();
-
-      if (response.ok) {
-        // Store token and user data
-        localStorage.setItem('token', data.data.token);
-        localStorage.setItem('user', JSON.stringify(data.data.user));
-        
-        setState(prev => ({ 
-          ...prev, 
-          user: data.data.user, 
-          loading: false,
-          error: null 
-        }));
-        
-        return true;
-      } else {
-        // Handle error response dengan struktur baru
-        const errorMessage = data.error?.message || data.error || 'Login gagal. Silakan coba lagi.';
-        
-        setState(prev => ({ 
-          ...prev, 
-          loading: false, 
-          error: errorMessage        }));
-        return false;
-      }
-    } catch (error) {
-      console.error('Login error:', error);
+      const response = await api.post('/auth/login', credentials);
+      const data = response.data;
+      setState(prev => ({ 
+        ...prev, 
+        user: data.data.user, 
+        loading: false,
+        error: null 
+      }));
+      return true;
+    } catch (error: any) {
+      const errorMessage = error?.response?.data?.error?.message || error?.message || 'Login gagal. Silakan coba lagi.';
       setState(prev => ({ 
         ...prev, 
         loading: false, 
-        error: 'Terjadi kesalahan jaringan. Silakan periksa koneksi internet Anda.' 
+        error: errorMessage 
       }));
       return false;
     }
@@ -101,46 +60,29 @@ export const useAuth = (): UseAuthReturn => {
 
   const register = useCallback(async (registerData: RegisterRequest): Promise<boolean> => {
     setState(prev => ({ ...prev, loading: true, error: null }));
-
     try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(registerData),
-      });      const data = await response.json();
-
-      if (response.ok) {
-        setState(prev => ({ 
-          ...prev, 
-          loading: false,
-          error: null 
-        }));
-        
-        return true;
-      } else {
-        // Handle error response dengan struktur baru
-        const errorMessage = data.error?.message || data.error || 'Registrasi gagal. Silakan coba lagi.';
-        
-        setState(prev => ({ 
-          ...prev, 
-          loading: false, 
-          error: errorMessage        }));
-        return false;
-      }
-    } catch (error) {
-      console.error('Register error:', error);
+      await api.post('/auth/register', registerData);
+      setState(prev => ({ 
+        ...prev, 
+        loading: false,
+        error: null 
+      }));
+      return true;
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { error?: { message?: string } } }, message?: string };
+      const errorMessage = err?.response?.data?.error?.message || err?.message || 'Registrasi gagal. Silakan coba lagi.';
       setState(prev => ({ 
         ...prev, 
         loading: false, 
-        error: 'Terjadi kesalahan jaringan. Silakan periksa koneksi internet Anda.' 
+        error: errorMessage 
       }));
       return false;
     }
   }, []);
 
-  const logout = useCallback(() => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+  const logout = useCallback(async () => {
+    // Hapus cookie token di server
+    await fetch('/api/auth/logout', { method: 'POST' });
     setState({ user: null, loading: false, error: null });
     router.push('/auth/login');
   }, [router]);

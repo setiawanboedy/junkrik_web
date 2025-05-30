@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import api from '@/lib/utils/apiClient';
 
 interface ScheduleFormData {
   dayOfWeek: number;
@@ -41,29 +42,17 @@ export default function ScheduleForm({ initialData, scheduleId, onSuccess }: Sch
     setError('');
 
     try {
-      const url = scheduleId ? `/api/schedules/${scheduleId}` : '/api/schedules';
-      const method = scheduleId ? 'PUT' : 'POST';
-
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to save schedule');
-      }
+      const url = scheduleId ? `/schedules/${scheduleId}` : '/schedules';
+      const method = scheduleId ? 'put' : 'post';
+      await api[method](url, formData);
 
       if (onSuccess) {
         onSuccess();
       } else {
         router.push('/dashboard/schedules');
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+    } catch (err: any) {
+      setError(err?.response?.data?.error || err?.message || 'An error occurred');
     } finally {
       setLoading(false);
     }

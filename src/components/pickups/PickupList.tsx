@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import { usePickups } from '@/hooks/usePickups';
 
 interface Pickup {
   id: string;
@@ -44,55 +45,8 @@ const WASTE_TYPE_COLORS = {
 };
 
 export default function PickupList() {
-  const [pickups, setPickups] = useState<Pickup[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
-
-  const fetchPickups = useCallback(async () => {
-    try {
-      const queryParams = new URLSearchParams();
-      if (statusFilter) queryParams.append('status', statusFilter);
-      
-      const response = await fetch(`/api/pickups?${queryParams}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch pickups');
-      }
-      const data = await response.json();
-      setPickups(data.data || []);
-    } catch (err) {      setError(err instanceof Error ? err.message : 'An error occurred');
-    } finally {
-      setLoading(false);
-    }
-  }, [statusFilter]);
-
-  useEffect(() => {
-    fetchPickups();
-  }, [fetchPickups]);
-
-  const handleCancel = async (pickupId: string) => {
-    if (!confirm('Are you sure you want to cancel this pickup?')) {
-      return;
-    }
-
-    try {
-      const response = await fetch(`/api/pickups/${pickupId}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to cancel pickup');
-      }
-
-      setPickups(pickups.map(pickup => 
-        pickup.id === pickupId 
-          ? { ...pickup, status: 'CANCELLED' }
-          : pickup
-      ));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to cancel pickup');
-    }
-  };
+  const { pickups, loading, error, cancelPickup } = usePickups(statusFilter);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('id-ID', {
@@ -118,18 +72,18 @@ export default function PickupList() {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold text-gray-900">Pickup Requests</h2>
         <Link
           href="/dashboard/pickups/new"
-          className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+          className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 font-semibold shadow"
         >
-          Request Pickup
+          + Request Pickup
         </Link>
       </div>
 
       {/* Filter */}
-      <div className="flex space-x-4">
+      <div className="flex space-x-4 mb-4">
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
@@ -155,21 +109,21 @@ export default function PickupList() {
           <div className="text-gray-500 mb-4">No pickup requests found</div>
           <Link
             href="/dashboard/pickups/new"
-            className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+            className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold shadow"
           >
             Request Your First Pickup
           </Link>
         </div>
       ) : (
-        <div className="grid gap-6">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {pickups.map((pickup) => (
             <div
               key={pickup.id}
-              className="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-500"
+              className="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-green-500 flex flex-col justify-between h-full transition-transform hover:scale-[1.02]"
             >
               <div className="flex justify-between items-start mb-4">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">
                     Pickup Request #{pickup.id.slice(-8)}
                   </h3>
                   <p className="text-sm text-gray-600 mb-1">
@@ -239,15 +193,14 @@ export default function PickupList() {
               )}
 
               {/* Actions */}
-              <div className="flex justify-between items-center pt-4 border-t border-gray-200">
+              <div className="flex justify-between items-center pt-4 border-t border-gray-200 mt-auto">
                 <span className="text-xs text-gray-500">
                   Created {new Date(pickup.createdAt).toLocaleDateString('id-ID')}
                 </span>
-                
                 <div className="flex gap-2">
                   {pickup.status === 'PENDING' && (
                     <button
-                      onClick={() => handleCancel(pickup.id)}
+                      onClick={() => cancelPickup(pickup.id)}
                       className="text-red-600 hover:text-red-800 text-sm font-medium"
                     >
                       Cancel

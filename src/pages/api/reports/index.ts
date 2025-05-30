@@ -11,6 +11,7 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
 
   try {
     if (req.method === 'GET') {
+      res.setHeader('Cache-Control', 'no-store'); // Selalu return data terbaru, tidak 304
       // Get user reports with optional filters
       const { year, month, type } = req.query;
       const filters = {

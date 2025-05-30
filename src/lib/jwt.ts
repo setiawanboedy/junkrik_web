@@ -1,4 +1,4 @@
-import jwt from 'jsonwebtoken';
+import jwt, { JsonWebTokenError } from 'jsonwebtoken';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'devsecret';
 
@@ -7,7 +7,15 @@ export function generateToken(payload: object) {
 }
 
 export function verifyToken(token: string) {
-  return jwt.verify(token, JWT_SECRET);
+  try {
+    return jwt.verify(token, JWT_SECRET);
+  } catch (err) {
+    if (err instanceof JsonWebTokenError) {
+      // Return null or throw custom error for invalid token
+      return null;
+    }
+    throw err;
+  }
 }
 
 export { verifyToken as verifyJWT }; // Alias for backward compatibility

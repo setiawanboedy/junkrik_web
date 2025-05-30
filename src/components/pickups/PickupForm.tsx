@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import api from '@/lib/utils/apiClient';
 
 interface Schedule {
   id: string;
@@ -64,11 +65,8 @@ export default function PickupForm() {
 
   const fetchSchedules = async () => {
     try {
-      const response = await fetch('/api/schedules');
-      if (response.ok) {
-        const data = await response.json();
-        setSchedules(data.data || []);
-      }
+      const response = await api.get('/schedules');
+      setSchedules(response.data.data || []);
     } catch (err) {
       console.error('Failed to fetch schedules:', err);
     }
@@ -85,32 +83,23 @@ export default function PickupForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (formData.wasteTypes.length === 0) {
       setError('Please select at least one waste type');
       return;
     }
-
     setLoading(true);
     setError('');
-
     try {
-      const response = await fetch('/api/pickups', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to create pickup request');
-      }
-
+      await api.post('/pickups', formData);
       router.push('/dashboard/pickups');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+    } catch (err: unknown) {
+      if (err && typeof err === 'object' && 'response' in err && err.response && typeof err.response === 'object' && 'data' in err.response) {
+        setError(err.response.data.error || 'Failed to create pickup request');
+      } else if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('An error occurred');
+      }
     } finally {
       setLoading(false);
     }

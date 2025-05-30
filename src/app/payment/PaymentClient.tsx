@@ -6,15 +6,6 @@ export default function PaymentClient() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    // Cek apakah user sudah login
-    const token = localStorage.getItem('token');
-    if (!token) {
-      router.push('/auth/login');
-      return;
-    }
-    setLoading(false);
-  }, [router]);
 
   if (loading) {
     return (
