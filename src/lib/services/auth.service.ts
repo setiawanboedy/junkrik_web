@@ -2,20 +2,7 @@ import prisma from '@/lib/prisma';
 import { hashPassword, comparePassword } from '@/lib/password';
 import { generateToken } from '@/lib/jwt';
 import { RegisterRequest, LoginRequest, AuthResponse } from '@/lib/validations/auth';
-
-export class UserExistsError extends Error {
-  constructor(message: string = 'User already exists') {
-    super(message);
-    this.name = 'UserExistsError';
-  }
-}
-
-export class InvalidCredentialsError extends Error {
-  constructor(message: string = 'Invalid credentials') {
-    super(message);
-    this.name = 'InvalidCredentialsError';
-  }
-}
+import { UserExistsError, InvalidCredentialsError } from '@/lib/utils/api';
 
 export class AuthService {
   /**
@@ -64,7 +51,6 @@ export class AuthService {
       }
     };
   }
-
   /**
    * Login user
    */
@@ -75,13 +61,13 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new InvalidCredentialsError();
+      throw new InvalidCredentialsError('Email atau password yang Anda masukkan salah');
     }
 
     // Verify password
     const isPasswordValid = await comparePassword(data.password, user.password);
     if (!isPasswordValid) {
-      throw new InvalidCredentialsError();
+      throw new InvalidCredentialsError('Email atau password yang Anda masukkan salah');
     }
 
     // Generate token

@@ -63,9 +63,7 @@ export const useAuth = (): UseAuthReturn => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(credentials),
-      });
-
-      const data = await response.json();
+      });      const data = await response.json();
 
       if (response.ok) {
         // Store token and user data
@@ -81,19 +79,21 @@ export const useAuth = (): UseAuthReturn => {
         
         return true;
       } else {
+        // Handle error response dengan struktur baru
+        const errorMessage = data.error?.message || data.error || 'Login gagal. Silakan coba lagi.';
+        
         setState(prev => ({ 
           ...prev, 
           loading: false, 
-          error: data.error || 'Login failed' 
-        }));
+          error: errorMessage        }));
         return false;
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Network error occurred';
+      console.error('Login error:', error);
       setState(prev => ({ 
         ...prev, 
         loading: false, 
-        error: errorMessage 
+        error: 'Terjadi kesalahan jaringan. Silakan periksa koneksi internet Anda.' 
       }));
       return false;
     }
@@ -107,9 +107,7 @@ export const useAuth = (): UseAuthReturn => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(registerData),
-      });
-
-      const data = await response.json();
+      });      const data = await response.json();
 
       if (response.ok) {
         setState(prev => ({ 
@@ -120,19 +118,21 @@ export const useAuth = (): UseAuthReturn => {
         
         return true;
       } else {
+        // Handle error response dengan struktur baru
+        const errorMessage = data.error?.message || data.error || 'Registrasi gagal. Silakan coba lagi.';
+        
         setState(prev => ({ 
           ...prev, 
           loading: false, 
-          error: data.error || 'Registration failed' 
-        }));
+          error: errorMessage        }));
         return false;
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Network error occurred';
+      console.error('Register error:', error);
       setState(prev => ({ 
         ...prev, 
         loading: false, 
-        error: errorMessage 
+        error: 'Terjadi kesalahan jaringan. Silakan periksa koneksi internet Anda.' 
       }));
       return false;
     }

@@ -1,5 +1,5 @@
 // Custom hook untuk form handling dengan validation
-import { useState, useCallback, ChangeEvent, FormEvent } from 'react';
+import { useState, useCallback, ChangeEvent, FormEvent, useMemo } from 'react';
 
 interface ValidationRule<T> {
   required?: boolean;
@@ -37,13 +37,16 @@ export function useForm<T extends Record<string, unknown>>(
   initialValues: T,
   validationRules?: ValidationRules<T>
 ): UseFormReturn<T> {
-  const [formState, setFormState] = useState<FormState<T>>({
+  // Memoize initial state to prevent hydration mismatch
+  const initialFormState = useMemo(() => ({
     values: initialValues,
-    errors: {},
-    touched: {},
+    errors: {} as Partial<Record<keyof T, string>>,
+    touched: {} as Partial<Record<keyof T, boolean>>,
     isSubmitting: false,
     isValid: true,
-  });
+  }), [initialValues]);
+
+  const [formState, setFormState] = useState<FormState<T>>(initialFormState);
 
   const validateField = useCallback((field: keyof T): boolean => {
     const value = formState.values[field];

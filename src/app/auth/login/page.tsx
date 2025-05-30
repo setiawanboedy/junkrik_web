@@ -10,6 +10,7 @@ import {
   SubmitButton, 
   ErrorAlert 
 } from '@/components/ui/FormComponents';
+import { useEffect, useState } from 'react';
 
 // Form validation rules
 const validationRules = {
@@ -26,6 +27,12 @@ const validationRules = {
 export default function LoginPage() {
   const router = useRouter();
   const { login, loading, error, clearError } = useAuth();
+  const [mounted, setMounted] = useState(false);
+  
+  // Prevent hydration mismatch by only rendering form after mount
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   
   const {
     values,
@@ -39,13 +46,28 @@ export default function LoginPage() {
     { email: '', password: '' },
     validationRules
   );
-
   const onSubmit = async (formData: LoginRequest) => {
     const success = await login(formData);
     if (success) {
       router.push('/dashboard');
     }
   };
+
+  // Don't render form until component is mounted to prevent hydration mismatch
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+        <div className="sm:mx-auto sm:w-full sm:max-w-md">
+          <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+            <div className="flex justify-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <FormContainer
       title="Login Junkrik"

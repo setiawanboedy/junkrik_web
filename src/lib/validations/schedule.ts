@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 export interface CreateScheduleRequest {
   dayOfWeek: number; // 0=Sunday, 1=Monday, etc.
   time: string; // Format: "HH:MM"
@@ -19,10 +18,24 @@ export class ScheduleValidationError extends Error {
   }
 }
 
-export function validateCreateSchedule(data: any): CreateScheduleRequest {
+// Input types for validation functions (form data comes as strings)
+interface CreateScheduleInput {
+  dayOfWeek: string | number;
+  time: string;
+  notes?: string;
+}
+
+interface UpdateScheduleInput {
+  dayOfWeek?: string | number;
+  time?: string;
+  isActive?: string | boolean;
+  notes?: string;
+}
+
+export function validateCreateSchedule(data: CreateScheduleInput): CreateScheduleRequest {
   const { dayOfWeek, time, notes } = data;
 
-  if (dayOfWeek === undefined || dayOfWeek === null) {
+  if (dayOfWeek === undefined || dayOfWeek === null || dayOfWeek === '') {
     throw new ScheduleValidationError('Day of week is required');
   }
 
@@ -30,7 +43,9 @@ export function validateCreateSchedule(data: any): CreateScheduleRequest {
     throw new ScheduleValidationError('Time is required');
   }
 
-  if (dayOfWeek < 0 || dayOfWeek > 6) {
+  const dayOfWeekNum = typeof dayOfWeek === 'string' ? parseInt(dayOfWeek) : dayOfWeek;
+
+  if (isNaN(dayOfWeekNum) || dayOfWeekNum < 0 || dayOfWeekNum > 6) {
     throw new ScheduleValidationError('Day of week must be between 0 (Sunday) and 6 (Saturday)');
   }
 
@@ -39,24 +54,25 @@ export function validateCreateSchedule(data: any): CreateScheduleRequest {
   }
 
   return {
-    dayOfWeek: parseInt(dayOfWeek),
+    dayOfWeek: dayOfWeekNum,
     time: time.trim(),
     notes: notes?.trim()
   };
 }
 
-export function validateUpdateSchedule(data: any): UpdateScheduleRequest {
+export function validateUpdateSchedule(data: UpdateScheduleInput): UpdateScheduleRequest {
   const { dayOfWeek, time, isActive, notes } = data;
   const result: UpdateScheduleRequest = {};
 
-  if (dayOfWeek !== undefined) {
-    if (dayOfWeek < 0 || dayOfWeek > 6) {
+  if (dayOfWeek !== undefined && dayOfWeek !== '') {
+    const dayOfWeekNum = typeof dayOfWeek === 'string' ? parseInt(dayOfWeek) : dayOfWeek;
+    if (isNaN(dayOfWeekNum) || dayOfWeekNum < 0 || dayOfWeekNum > 6) {
       throw new ScheduleValidationError('Day of week must be between 0 (Sunday) and 6 (Saturday)');
     }
-    result.dayOfWeek = parseInt(dayOfWeek);
+    result.dayOfWeek = dayOfWeekNum;
   }
 
-  if (time !== undefined) {
+  if (time !== undefined && time !== '') {
     if (!/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(time)) {
       throw new ScheduleValidationError('Time must be in HH:MM format');
     }
@@ -64,11 +80,11 @@ export function validateUpdateSchedule(data: any): UpdateScheduleRequest {
   }
 
   if (isActive !== undefined) {
-    result.isActive = Boolean(isActive);
+    result.isActive = typeof isActive === 'string' ? isActive === 'true' : Boolean(isActive);
   }
 
   if (notes !== undefined) {
-    result.notes = notes?.trim();
+    result.notes = typeof notes === 'string' ? notes.trim() : notes;
   }
 
   return result;

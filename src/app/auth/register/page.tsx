@@ -12,6 +12,7 @@ import {
   SubmitButton, 
   ErrorAlert 
 } from '@/components/ui/FormComponents';
+import { useEffect, useState } from 'react';
 
 // Form data interface (all strings from form inputs)
 interface RegisterFormData {
@@ -75,7 +76,14 @@ const validationRules = {
 export default function RegisterPage() {
   const router = useRouter();
   const { register, loading, error, clearError } = useAuth();
-    const {
+  const [mounted, setMounted] = useState(false);
+  
+  // Prevent hydration mismatch by only rendering form after mount
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+  
+  const {
     values,
     errors,
     touched,
@@ -110,9 +118,24 @@ export default function RegisterPage() {
     const success = await register(registerData);
     if (success) {
       alert('Registrasi berhasil! Silakan login.');
-      router.push('/auth/login');
-    }
+      router.push('/auth/login');    }
   };
+
+  // Don't render form until component is mounted to prevent hydration mismatch
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+        <div className="sm:mx-auto sm:w-full sm:max-w-md">
+          <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+            <div className="flex justify-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <FormContainer
       title="Daftar Bisnis Junkrik"
@@ -186,13 +209,11 @@ export default function RegisterPage() {
         rows={3}
         onChange={handleChange}
         onBlur={handleBlur}
-      />
-
-      <SelectField
+      />      <SelectField
         id="wasteType"
         name="wasteType"
         label="Jenis Sampah Utama"
-        value={values.wasteType || ''}
+        value={values.wasteType}
         error={errors.wasteType}
         touched={touched.wasteType}
         options={wasteTypeOptions}
@@ -204,7 +225,7 @@ export default function RegisterPage() {
         name="wasteVolume"
         type="number"
         label="Volume Sampah per Hari (kg)"
-        value={values.wasteVolume || ''}
+        value={values.wasteVolume}
         error={errors.wasteVolume}
         touched={touched.wasteVolume}
         placeholder="Contoh: 50"

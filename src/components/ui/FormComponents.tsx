@@ -33,16 +33,14 @@ export const InputField: React.FC<InputFieldProps> = ({
 }) => {
   const hasError = touched && error;
 
-  return (
-    <div className="mb-4">
+  return (    <div className="mb-4">
       <label 
         htmlFor={id} 
-        className="block text-sm font-medium text-gray-700 mb-1"
+        className="block text-sm font-medium text-gray-900 mb-1"
       >
         {label}
         {required && <span className="text-red-500 ml-1">*</span>}
-      </label>
-      <input
+      </label>      <input
         id={id}
         name={name}
         type={type}
@@ -54,11 +52,12 @@ export const InputField: React.FC<InputFieldProps> = ({
         className={`
           w-full px-3 py-2 border rounded-md shadow-sm 
           focus:outline-none focus:ring-2 focus:ring-offset-2
+          text-gray-900 placeholder-gray-500
           ${hasError 
             ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
             : 'border-gray-300 focus:ring-green-500 focus:border-green-500'
           }
-          ${disabled ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'}
+          ${disabled ? 'bg-gray-100 cursor-not-allowed text-gray-600' : 'bg-white'}
         `}
       />
       {hasError && (
@@ -100,16 +99,14 @@ export const TextAreaField: React.FC<TextAreaFieldProps> = ({
 }) => {
   const hasError = touched && error;
 
-  return (
-    <div className="mb-4">
+  return (    <div className="mb-4">
       <label 
         htmlFor={id} 
-        className="block text-sm font-medium text-gray-700 mb-1"
+        className="block text-sm font-medium text-gray-900 mb-1"
       >
         {label}
         {required && <span className="text-red-500 ml-1">*</span>}
-      </label>
-      <textarea
+      </label>      <textarea
         id={id}
         name={name}
         value={value}
@@ -121,11 +118,12 @@ export const TextAreaField: React.FC<TextAreaFieldProps> = ({
         className={`
           w-full px-3 py-2 border rounded-md shadow-sm 
           focus:outline-none focus:ring-2 focus:ring-offset-2
+          text-gray-900 placeholder-gray-500
           ${hasError 
             ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
             : 'border-gray-300 focus:ring-green-500 focus:border-green-500'
           }
-          ${disabled ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'}
+          ${disabled ? 'bg-gray-100 cursor-not-allowed text-gray-600' : 'bg-white'}
         `}
       />
       {hasError && (
@@ -172,16 +170,14 @@ export const SelectField: React.FC<SelectFieldProps> = ({
 }) => {
   const hasError = touched && error;
 
-  return (
-    <div className="mb-4">
+  return (    <div className="mb-4">
       <label 
         htmlFor={id} 
-        className="block text-sm font-medium text-gray-700 mb-1"
+        className="block text-sm font-medium text-gray-900 mb-1"
       >
         {label}
         {required && <span className="text-red-500 ml-1">*</span>}
-      </label>
-      <select
+      </label>      <select
         id={id}
         name={name}
         value={value}
@@ -191,11 +187,12 @@ export const SelectField: React.FC<SelectFieldProps> = ({
         className={`
           w-full px-3 py-2 border rounded-md shadow-sm 
           focus:outline-none focus:ring-2 focus:ring-offset-2
+          text-gray-900
           ${hasError 
             ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
             : 'border-gray-300 focus:ring-green-500 focus:border-green-500'
           }
-          ${disabled ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'}
+          ${disabled ? 'bg-gray-100 cursor-not-allowed text-gray-600' : 'bg-white'}
         `}
       >
         {placeholder && (
@@ -309,6 +306,42 @@ export const ErrorAlert: React.FC<ErrorAlertProps> = ({ error, onDismiss }) => {
               type="button"
               onClick={onDismiss}
               className="text-red-400 hover:text-red-600"
+            >
+              <span className="sr-only">Close</span>
+              <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path
+                  fillRule="evenodd"
+                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// Success Alert Component
+interface SuccessAlertProps {
+  message: string;
+  onDismiss?: () => void;
+}
+
+export const SuccessAlert: React.FC<SuccessAlertProps> = ({ message, onDismiss }) => {
+  return (
+    <div className="mb-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md">
+      <div className="flex">
+        <div className="flex-1">
+          <p className="text-sm">{message}</p>
+        </div>
+        {onDismiss && (
+          <div className="ml-4">
+            <button
+              type="button"
+              onClick={onDismiss}
+              className="text-green-400 hover:text-green-600"
             >
               <span className="sr-only">Close</span>
               <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
