@@ -8,7 +8,7 @@ export default function RecentActivity({ activities }: RecentActivityProps) {
   if (!activities || activities.length === 0) {
     return (
       <div className="bg-white rounded-lg shadow p-6 mb-6">
-        <h3 className="text-lg font-semibold mb-4">Aktivitas Terbaru</h3>
+        <h3 className="text-lg font-semibold mb-4 text-gray-900">Aktivitas Terbaru</h3>
         <div className="text-gray-500">Belum ada aktivitas terbaru.</div>
       </div>
     );
