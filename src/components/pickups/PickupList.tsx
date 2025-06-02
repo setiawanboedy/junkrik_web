@@ -201,7 +201,7 @@ export default function PickupList() {
                   {pickup.status === 'PENDING' && (
                     <button
                       onClick={() => cancelPickup(pickup.id)}
-                      className="text-red-600 hover:text-red-800 text-sm font-medium"
+                      className="text-red-600 cursor-pointer hover:text-red-800 text-sm font-medium"
                     >
                       Cancel
                     </button>

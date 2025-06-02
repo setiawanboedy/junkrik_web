@@ -86,9 +86,17 @@ export default function PickupForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // Convert pickupDate to ISO string if needed
+    // eslint-disable-next-line prefer-const
+    let submitData = { ...formData };
+    if (formData.pickupDate && !formData.pickupDate.endsWith('Z')) {
+      // Convert 'YYYY-MM-DDTHH:mm' to ISO
+      const date = new Date(formData.pickupDate);
+      submitData.pickupDate = date.toISOString();
+    }
     // Robust client-side validation
     try {
-      validateCreatePickup(formData);
+      validateCreatePickup(submitData);
     } catch (validationErr: any) {
       const msg = validationErr?.errors?.[0]?.message || validationErr?.message || 'Invalid input';
       setError(msg);
@@ -103,7 +111,7 @@ export default function PickupForm() {
     setLoading(true);
     setError('');
     try {
-      await api.post('/pickups', formData);
+      await api.post('/pickups', submitData);
       toast.success('Pickup request created successfully!');
       router.push('/dashboard/pickups');
     } catch (err: unknown) {
