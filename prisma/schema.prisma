@@ -22,9 +22,10 @@ model User {
   updatedAt   DateTime @updatedAt
   
   // Relations
-  schedules   Schedule[]
-  pickups     Pickup[]
-  reports     Report[]
+  schedules       Schedule[]
+  pickups         Pickup[]
+  reports         Report[]
+  rewardHistories RewardHistory[]
 }
 
 model Schedule {
@@ -83,4 +84,34 @@ model Report {
   user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   @@unique([userId, year, month, type])
+}
+
+model Reward {
+  id             String   @id @default(uuid())
+  name           String
+  description    String
+  requiredCredit Float
+  imageUrl       String?
+  available      Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  histories      RewardHistory[]
+}
+
+model RewardHistory {
+  id         String   @id @default(uuid())
+  userId     String
+  rewardId   String
+  redeemedAt DateTime @default(now())
+  status     RewardStatus @default(PENDING)
+  code       String?
+  expiredAt  DateTime?
+  user       User     @relation(fields: [userId], references: [id])
+  reward     Reward   @relation(fields: [rewardId], references: [id])
+}
+
+enum RewardStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
