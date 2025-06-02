@@ -93,8 +93,20 @@ export default function PickupForm() {
       await api.post('/pickups', formData);
       router.push('/dashboard/pickups');
     } catch (err: unknown) {
-      if (err && typeof err === 'object' && 'response' in err && err.response && typeof err.response === 'object' && 'data' in err.response) {
-        setError(err.response.data.error || 'Failed to create pickup request');
+      if (
+        err &&
+        typeof err === 'object' &&
+        'response' in err &&
+        err.response &&
+        typeof err.response === 'object' &&
+        'data' in err.response
+      ) {
+        const data = (err.response as { data?: unknown }).data;
+        if (data && typeof data === 'object' && 'error' in data) {
+          setError((data as { error?: string }).error || 'Failed to create pickup request');
+        } else {
+          setError('Failed to create pickup request');
+        }
       } else if (err instanceof Error) {
         setError(err.message);
       } else {
@@ -124,7 +136,7 @@ export default function PickupForm() {
           <select
             value={formData.scheduleId || ''}
             onChange={(e) => setFormData({ ...formData, scheduleId: e.target.value || undefined })}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50 text-gray-900"
           >
             <option value="">No schedule (one-time pickup)</option>
             {schedules.map((schedule) => (
@@ -145,7 +157,7 @@ export default function PickupForm() {
             id="pickupDate"
             value={formData.pickupDate}
             onChange={(e) => setFormData({ ...formData, pickupDate: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50 text-gray-900"
             required
           />
         </div>
@@ -183,7 +195,7 @@ export default function PickupForm() {
             placeholder="e.g., 10"
             min="0"
             step="0.1"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50 text-gray-900"
           />
         </div>
 
@@ -204,7 +216,7 @@ export default function PickupForm() {
                 address: { ...formData.address, street: e.target.value }
               })}
               placeholder="e.g., Jl. Sudirman No. 123"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50 text-gray-900"
               required
             />
           </div>
@@ -223,7 +235,7 @@ export default function PickupForm() {
                   address: { ...formData.address, city: e.target.value }
                 })}
                 placeholder="e.g., Jakarta"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50 text-gray-900"
                 required
               />
             </div>
@@ -241,7 +253,7 @@ export default function PickupForm() {
                   address: { ...formData.address, postalCode: e.target.value }
                 })}
                 placeholder="e.g., 12345"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50 text-gray-900"
                 required
               />
             </div>
@@ -260,7 +272,7 @@ export default function PickupForm() {
                 address: { ...formData.address, notes: e.target.value }
               })}
               placeholder="e.g., Building A, 2nd floor"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50 text-gray-900"
             />
           </div>
         </div>
@@ -276,7 +288,7 @@ export default function PickupForm() {
             onChange={(e) => setFormData({ ...formData, specialInstructions: e.target.value })}
             placeholder="Any special instructions for the pickup team..."
             rows={3}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50 text-gray-900"
           />
         </div>
 

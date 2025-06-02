@@ -1,31 +1,31 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePickups } from '@/hooks/usePickups';
 
-interface Pickup {
-  id: string;
-  pickupDate: string;
-  wasteTypes: string[];
-  estimatedWeight?: number;
-  actualWeight?: number;
-  status: string;
-  address: {
-    street: string;
-    city: string;
-    postalCode: string;
-    notes?: string;
-  };
-  specialInstructions?: string;
-  driverNotes?: string;
-  createdAt: string;
-  schedule?: {
-    id: string;
-    dayOfWeek: number;
-    time: string;
-  };
-}
+// interface Pickup {
+//   id: string;
+//   pickupDate: string;
+//   wasteTypes: string[];
+//   estimatedWeight?: number;
+//   actualWeight?: number;
+//   status: string;
+//   address: {
+//     street: string;
+//     city: string;
+//     postalCode: string;
+//     notes?: string;
+//   };
+//   specialInstructions?: string;
+//   driverNotes?: string;
+//   createdAt: string;
+//   schedule?: {
+//     id: string;
+//     dayOfWeek: number;
+//     time: string;
+//   };
+// }
 
 const STATUS_COLORS = {
   PENDING: 'bg-yellow-100 text-yellow-800',
@@ -87,7 +87,7 @@ export default function PickupList() {
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+          className="px-3 py-2 border border-gray-300 rounded-md text-black focus:outline-none focus:ring-2 focus:ring-green-500"
         >
           <option value="">All Status</option>
           <option value="PENDING">Pending</option>
