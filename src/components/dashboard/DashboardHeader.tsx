@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 const menu = [
   { href: '/dashboard', label: 'Dashboard' },
@@ -12,8 +13,12 @@ const menu = [
 ];
 
 export default function DashboardHeader() {
-  const pathname = typeof window !== 'undefined' ? window.location.pathname : '/dashboard';
-  const isActive = (href: string) => pathname.startsWith(href) && (href === '/dashboard' ? pathname === '/dashboard' : true);
+  const pathname = usePathname();
+  const isActive = (href: string) => {
+    if (!pathname) return false;
+    if (href === '/dashboard') return pathname === '/dashboard';
+    return pathname.startsWith(href);
+  };
 
   return (
     <header className="bg-white shadow-sm border-b sticky top-0 z-10">
