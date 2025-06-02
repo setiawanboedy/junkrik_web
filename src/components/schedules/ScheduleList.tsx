@@ -1,7 +1,7 @@
 'use client';
 
 import { useSchedules } from '@/hooks/useSchedules';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 
 const DAYS_OF_WEEK = [
@@ -10,6 +10,8 @@ const DAYS_OF_WEEK = [
 
 export default function ScheduleList() {
   const { schedules, loading, error, deleteSchedule, toggleActive } = useSchedules();
+  const [confirmId, setConfirmId] = useState<string | null>(null);
+  const [confirmSchedule, setConfirmSchedule] = useState<{id: string, label: string} | null>(null);
 
   if (loading) {
     return (
@@ -66,7 +68,7 @@ export default function ScheduleList() {
                 </div>
                 <button
                   onClick={() => toggleActive(schedule.id, schedule.isActive)}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
+                  className={`relative cursor-pointer inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
                     schedule.isActive ? 'bg-green-600' : 'bg-gray-200'
                   }`}
                   title="Toggle Active"
@@ -95,13 +97,16 @@ export default function ScheduleList() {
                 <div className="flex gap-2">
                   <Link
                     href={`/dashboard/schedules/${schedule.id}/edit`}
-                    className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                    className="text-blue-600 cursor-pointer hover:text-blue-800 text-sm font-medium"
                   >
                     Edit
                   </Link>
                   <button
-                    onClick={() => deleteSchedule(schedule.id)}
-                    className="text-red-600 hover:text-red-800 text-sm font-medium"
+                    onClick={() => {
+                      setConfirmId(schedule.id);
+                      setConfirmSchedule({id: schedule.id, label: `${DAYS_OF_WEEK[schedule.dayOfWeek]} ${schedule.time}`});
+                    }}
+                    className="text-red-600 cursor-pointer hover:text-red-800 text-sm font-medium"
                   >
                     Delete
                   </button>
@@ -109,6 +114,34 @@ export default function ScheduleList() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Modal konfirmasi global */}
+      {confirmId && confirmSchedule && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.45)' }}>
+          <div className="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full">
+            <h4 className="text-lg font-semibold mb-4 text-gray-900">Hapus Jadwal?</h4>
+            <p className="mb-2 text-gray-700">Apakah Anda yakin ingin menghapus jadwal <span className="font-bold">{confirmSchedule.label}</span>? Tindakan ini tidak dapat dibatalkan.</p>
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                onClick={() => { setConfirmId(null); setConfirmSchedule(null); }}
+                className="px-4 py-2 cursor-pointer rounded bg-gray-200 text-gray-700 hover:bg-gray-300"
+              >
+                Batal
+              </button>
+              <button
+                onClick={() => {
+                  deleteSchedule(confirmId);
+                  setConfirmId(null);
+                  setConfirmSchedule(null);
+                }}
+                className="px-4 py-2 rounded cursor-pointer bg-red-600 text-white hover:bg-red-700"
+              >
+                Hapus
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
