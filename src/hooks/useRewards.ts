@@ -29,7 +29,6 @@ export function useRewards() {
 
   useEffect(() => {
     fetchAll();
-    // eslint-disable-next-line
   }, []);
 
   const fetchAll = async () => {
