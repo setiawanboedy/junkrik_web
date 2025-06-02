@@ -1,11 +1,15 @@
 "use client";
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useSchedules } from '@/hooks/useSchedules';
+import ScheduleList from '@/components/schedules/ScheduleList';
+import toast from 'react-hot-toast';
+import { useEffect } from 'react';
 
 export default function SchedulesClient() {
-  const router = useRouter();
-  const [loading, setLoading] = useState(true);
+  const { loading, error } = useSchedules();
 
+  useEffect(() => {
+    if (error) toast.error(error);
+  }, [error]);
 
   if (loading) {
     return (
@@ -16,21 +20,13 @@ export default function SchedulesClient() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50">
       <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Jadwal Pengambilan</h1>
           <p className="mt-2 text-gray-600">Atur jadwal rutin pengambilan sampah</p>
         </div>
-        <div className="bg-white shadow rounded-lg p-6">
-          <h2 className="text-xl font-semibold mb-4">Jadwal Aktif</h2>
-          <div className="text-center py-8">
-            <p className="text-gray-500">Belum ada jadwal pengambilan</p>
-            <button className="mt-4 bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
-              Buat Jadwal Baru
-            </button>
-          </div>
-        </div>
+        <ScheduleList />
       </div>
     </div>
   );

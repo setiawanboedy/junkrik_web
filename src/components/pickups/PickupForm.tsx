@@ -1,8 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/utils/apiClient';
+import toast from 'react-hot-toast';
+import { validateCreatePickup } from '@/lib/validations/pickup';
 
 interface Schedule {
   id: string;
@@ -83,16 +86,28 @@ export default function PickupForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // Robust client-side validation
+    try {
+      validateCreatePickup(formData);
+    } catch (validationErr: any) {
+      const msg = validationErr?.errors?.[0]?.message || validationErr?.message || 'Invalid input';
+      setError(msg);
+      toast.error(msg);
+      return;
+    }
     if (formData.wasteTypes.length === 0) {
       setError('Please select at least one waste type');
+      toast.error('Please select at least one waste type');
       return;
     }
     setLoading(true);
     setError('');
     try {
       await api.post('/pickups', formData);
+      toast.success('Pickup request created successfully!');
       router.push('/dashboard/pickups');
     } catch (err: unknown) {
+      let msg = 'An error occurred';
       if (
         err &&
         typeof err === 'object' &&
@@ -103,15 +118,15 @@ export default function PickupForm() {
       ) {
         const data = (err.response as { data?: unknown }).data;
         if (data && typeof data === 'object' && 'error' in data) {
-          setError((data as { error?: string }).error || 'Failed to create pickup request');
+          msg = (data as { error?: string }).error || 'Failed to create pickup request';
         } else {
-          setError('Failed to create pickup request');
+          msg = 'Failed to create pickup request';
         }
       } else if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError('An error occurred');
+        msg = err.message;
       }
+      setError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }

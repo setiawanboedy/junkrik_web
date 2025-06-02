@@ -1,8 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/utils/apiClient';
+import { useScheduleDetail } from '@/hooks/useScheduleDetail';
+import toast from 'react-hot-toast';
+import { validateCreateSchedule, ScheduleValidationError } from '@/lib/validations/schedule';
 
 interface ScheduleFormData {
   dayOfWeek: number;
@@ -36,23 +39,56 @@ export default function ScheduleForm({ initialData, scheduleId, onSuccess }: Sch
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // Fetch initial data jika edit
+  const { schedule } = useScheduleDetail(scheduleId || '');
+  useEffect(() => {
+    if (scheduleId && schedule) {
+      setFormData({
+        dayOfWeek: schedule.dayOfWeek,
+        time: schedule.time,
+        notes: schedule.notes || ''
+      });
+    }
+  }, [scheduleId, schedule]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // Robust client-side validation
+    try {
+      validateCreateSchedule(formData);
+    } catch (validationErr) {
+      const msg = validationErr instanceof ScheduleValidationError ? validationErr.message : 'Invalid input';
+      setError(msg);
+      toast.error(msg);
+      return;
+    }
     setLoading(true);
     setError('');
-
     try {
       const url = scheduleId ? `/schedules/${scheduleId}` : '/schedules';
       const method = scheduleId ? 'put' : 'post';
       await api[method](url, formData);
 
+      toast.success(scheduleId ? 'Schedule updated successfully!' : 'Schedule created successfully!');
       if (onSuccess) {
         onSuccess();
       } else {
         router.push('/dashboard/schedules');
       }
-    } catch (err: any) {
-      setError(err?.response?.data?.error || err?.message || 'An error occurred');
+    } catch (err) {
+      let msg = 'An error occurred';
+      if (err && typeof err === 'object' && 'response' in err) {
+        const response = (err as { response?: { data?: { error?: string } } }).response;
+        if (response && response.data && response.data.error) {
+          msg = response.data.error;
+        } else {
+          msg = 'Failed to create/update schedule';
+        }
+      } else if (err instanceof Error) {
+        msg = err.message;
+      }
+      setError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
