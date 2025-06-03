@@ -3,7 +3,7 @@ import React from 'react';
 export default function AdminUsersPage() {
   return (
     <div>
-      <h2 className="text-xl font-bold mb-4 text-primary-700">Manajemen User/Bisnis</h2>
+      <h2 className="text-xl font-bold mb-4 text-gray-700">Manajemen User/Bisnis</h2>
       <p className="mb-6 text-gray-600 max-w-xl">
         Lihat, cari, dan kelola data user/bisnis yang terdaftar di platform. Anda dapat mengedit, suspend, atau reset password akun bisnis di sini.
       </p>

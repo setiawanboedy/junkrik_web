@@ -41,7 +41,8 @@ export default function AdminHeader() {
                   className={`px-4 py-2 rounded-lg font-medium transition-colors focus:outline-none
                     ${isActive ? 'bg-green-100 text-green-700' : 'text-gray-700 hover:bg-green-50'}`}
                 >
-                  <span className="text-lg" aria-hidden>{item.icon}</span> {item.label}
+                  {/* <span className="text-lg" aria-hidden>{item.icon}</span>  */}
+                  {item.label}
                 </Link>
               );
             })}
