@@ -32,7 +32,6 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
     if (!pickup) {
       return res.status(404).json({ success: false, error: 'Pickup not found' });
     }
-    // @ts-expect-error driverId field may not exist in TS types
     if (pickup.driverId !== req.user.id) {
       return res.status(404).json({ success: false, error: 'Pickup not assigned to this driver' });
     }
@@ -54,7 +53,6 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
       const filePath = Array.isArray(file) ? file[0].filepath : file.filepath;
       const fileName = path.basename(filePath);
       const photoUrl = `/uploads/${fileName}`;
-      // @ts-expect-error photoUrl not in generated TS types
       await prisma.pickup.update({ where: { id }, data: { photoUrl } });
       return res.status(200).json(createSuccessResponse({ photoUrl }, 'Photo uploaded successfully'));
     });
