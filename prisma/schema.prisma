@@ -23,7 +23,8 @@ model User {
   
   // Relations
   schedules       Schedule[]
-  pickups         Pickup[]
+  pickups         Pickup[] @relation("UserPickups")
+  driverPickups   Pickup[] @relation("DriverPickups")
   reports         Report[]
   rewardHistories RewardHistory[]
 }
@@ -46,6 +47,7 @@ model Schedule {
 model Pickup {
   id                  String   @id @default(uuid())
   userId              String
+  driverId            String?   // assigned driver
   scheduleId          String?
   pickupDate          DateTime
   wasteTypes          String[] // ['PLASTIC', 'ORGANIC', 'PAPER', 'METAL', 'GLASS', 'MIXED']
@@ -54,12 +56,14 @@ model Pickup {
   status              String   @default("PENDING") // PENDING, CONFIRMED, IN_PROGRESS, COMPLETED, CANCELLED
   address             Json     // {street, city, postalCode, notes}
   specialInstructions String?
+  photoUrl            String?   // URL of uploaded photo
   driverNotes         String?
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
   
   // Relations
-  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user                User      @relation("UserPickups", fields: [userId], references: [id], onDelete: Cascade)
+  driver              User?     @relation("DriverPickups", fields: [driverId], references: [id], onDelete: SetNull)
   schedule            Schedule? @relation(fields: [scheduleId], references: [id], onDelete: SetNull)
 }
 
