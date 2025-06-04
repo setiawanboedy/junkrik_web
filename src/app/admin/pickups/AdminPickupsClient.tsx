@@ -1,4 +1,5 @@
 "use client";
+import { InputField, SelectField } from '@/components/ui/FormComponents';
 import { useAdminPickups } from '@/hooks/useAdminPickups';
 import { useState } from 'react';
 
@@ -20,14 +21,30 @@ export default function AdminPickupsClient() {
       </p>
       {error && <div className="text-red-500 mb-4">{error}</div>}
       <form className="flex flex-wrap gap-2 mb-4 items-end" onSubmit={handleFilter}>
-        <select className="input input-bordered" value={status} onChange={e => setStatus(e.target.value)}>
-          <option value="">Semua</option>
-          <option value="PENDING">Pending</option>
-          <option value="IN_PROGRESS">In Progress</option>
-          <option value="COMPLETED">Completed</option>
-          <option value="CANCELLED">Cancelled</option>
-        </select>
-        <input className="input input-bordered" value={search} onChange={e => setSearch(e.target.value)} placeholder="Cari bisnis..." />
+        <SelectField
+          id="status"
+          name="status"
+          label=""
+          value={status}
+          onChange={e => setStatus(e.target.value)}
+          onBlur={() => {}}
+          options={[
+            { value: '', label: 'Semua Status' },
+            { value: 'PENDING', label: 'Pending' },
+            { value: 'IN_PROGRESS', label: 'In Progress' },
+            { value: 'COMPLETED', label: 'Completed' },
+            { value: 'CANCELLED', label: 'Cancelled' },
+          ]}
+        />
+        <InputField
+          id="search"
+          name="search"
+          label=""
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          onBlur={() => {}}
+          placeholder="Cari bisnis..."
+        />
         <button type="submit" className="btn btn-primary">Filter</button>
       </form>
       <div className="overflow-x-auto">

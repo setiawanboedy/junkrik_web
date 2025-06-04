@@ -1,16 +1,43 @@
-import React from 'react';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+'use client';
+import React, { useCallback } from 'react';
+import { useAdminUsers } from '@/hooks/useAdminUsers';
+import AdminUserTable from '@/components/admin/AdminUserTable';
+import toast from 'react-hot-toast';
 
 export default function AdminUsersPage() {
+  const { users, loading, error, updateUser, suspendUser, resetPassword } = useAdminUsers();
+
+  const handleEdit = useCallback(async (userId: string, data: any) => {
+    const ok = await updateUser(userId, data);
+    if (ok) toast.success('Data user berhasil diupdate');
+    else toast.error('Gagal update user');
+  }, [updateUser]);
+
+  const handleSuspend = useCallback(async (userId: string) => {
+    const ok = await suspendUser(userId);
+    if (ok) toast.success('User berhasil disuspend');
+    else toast.error('Gagal suspend user');
+  }, [suspendUser]);
+
+  const handleResetPassword = useCallback(async (userId: string) => {
+    const ok = await resetPassword(userId);
+    if (ok) toast.success('Password user berhasil direset');
+    else toast.error('Gagal reset password');
+  }, [resetPassword]);
+
   return (
     <div>
       <h2 className="text-xl font-bold mb-4 text-gray-700">Manajemen User/Bisnis</h2>
-      <p className="mb-6 text-gray-600 max-w-xl">
-        Lihat, cari, dan kelola data user/bisnis yang terdaftar di platform. Anda dapat mengedit, suspend, atau reset password akun bisnis di sini.
-      </p>
-      {/* Tabel user/bisnis dan aksi akan diimplementasikan di tahap berikutnya */}
-      <div className="bg-white rounded-lg shadow p-6 text-gray-400 text-center">
-        Tabel user/bisnis akan tampil di sini.
-      </div>
+      <p className="mb-6 text-gray-600 max-w-xl">Kelola data user/bisnis, suspend akun, dan reset password dari halaman ini.</p>
+      <AdminUserTable
+        users={users}
+        loading={loading}
+        error={error}
+        onEdit={handleEdit}
+        onSuspend={handleSuspend}
+        onResetPassword={handleResetPassword}
+      />
     </div>
   );
 }
