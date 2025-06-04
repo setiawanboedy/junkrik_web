@@ -71,7 +71,7 @@ export default function AdminPickupsClient() {
                   {/* Tombol aksi (approve, assign, dsb) */}
                   {p.status === 'PENDING' && (
                     <button
-                      className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm mr-2"
+                      className="px-3 py-1 cursor-pointer bg-blue-600 text-white rounded hover:bg-blue-700 text-sm mr-2"
                       onClick={() => updatePickupStatus(p.id, 'IN_PROGRESS')}
                     >
                       Approve
@@ -79,7 +79,7 @@ export default function AdminPickupsClient() {
                   )}
                   {p.status === 'IN_PROGRESS' && (
                     <button
-                      className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-sm mr-2"
+                      className="px-3 py-1 cursor-pointer bg-green-600 text-white rounded hover:bg-green-700 text-sm mr-2"
                       onClick={() => updatePickupStatus(p.id, 'COMPLETED')}
                     >
                       Selesai
@@ -87,7 +87,7 @@ export default function AdminPickupsClient() {
                   )}
                   {p.status !== 'COMPLETED' && p.status !== 'CANCELLED' && (
                     <button
-                      className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
+                      className="px-3 py-1 cursor-pointer bg-red-600 text-white rounded hover:bg-red-700 text-sm"
                       onClick={() => updatePickupStatus(p.id, 'CANCELLED')}
                     >
                       Batalkan
