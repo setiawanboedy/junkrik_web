@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useLogout } from '@/hooks/useLogout';
 
 const menu = [
   { href: '/dashboard', label: 'Dashboard' },
@@ -14,6 +15,7 @@ const menu = [
 
 export default function DashboardHeader() {
   const pathname = usePathname();
+  const logout = useLogout();
   const isActive = (href: string) => {
     if (!pathname) return false;
     if (href === '/dashboard') return pathname === '/dashboard';
@@ -45,12 +47,8 @@ export default function DashboardHeader() {
             ))}
           </nav>
           <button
-            onClick={() => {
-              fetch('/api/auth/logout', { method: 'POST' }).then(() => {
-                window.location.href = '/auth/login';
-              });
-            }}
-            className="bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-2 rounded-lg transition-colors ml-2"
+            onClick={logout}
+            className="bg-red-500 cursor-pointer hover:bg-red-600 text-white font-semibold px-4 py-2 rounded-lg transition-colors ml-2"
           >
             Logout
           </button>
