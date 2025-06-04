@@ -1,9 +1,9 @@
 "use client";
 import Link from "next/link";
-import { useUserCookie } from "@/hooks/useUserCookie";
+import { useAuthUser } from "@/hooks/useAuthUser";
 
 export default function LandingHeader() {
-  const { role, token } = useUserCookie();
+  const { user, loading } = useAuthUser();
   return (
     <header className="bg-white shadow-sm border-b">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -18,9 +18,9 @@ export default function LandingHeader() {
             <h1 className="text-2xl font-bold text-gray-900">Junkrik</h1>
           </div>
           <div className="flex space-x-4">
-            {token ? (
+            {loading ? null : user ? (
               <Link
-                href={role === 'admin' ? "/admin" : "/dashboard"}
+                href={user.role === 'admin' ? "/admin" : "/dashboard"}
                 className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
               >
                 Dashboard

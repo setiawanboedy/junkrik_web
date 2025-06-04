@@ -2,6 +2,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useLogout } from '@/hooks/useLogout';
 
 const adminMenu = [
   { href: '/admin', label: 'Dashboard', icon: '🏠' },
@@ -13,6 +14,7 @@ const adminMenu = [
 
 export default function AdminHeader() {
   const pathname = usePathname();
+  const logout = useLogout();
   return (
     <header className="bg-white shadow-sm border-b sticky top-0 z-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -47,7 +49,15 @@ export default function AdminHeader() {
               );
             })}
           </nav>
-          <div className="text-sm text-gray-500 font-semibold bg-gray-100 px-3 py-1 rounded-full ml-4">Admin</div>
+          <div className="flex items-center gap-2">
+            <div className="text-sm text-gray-500 font-semibold bg-gray-100 px-3 py-1 rounded-full">Admin</div>
+            <button
+              onClick={logout}
+              className="bg-red-500 cursor-pointer hover:bg-red-600 text-white font-semibold px-4 py-2 rounded-lg transition-colors ml-2"
+            >
+              Logout
+            </button>
+          </div>
         </div>
       </div>
     </header>

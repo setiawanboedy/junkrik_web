@@ -82,7 +82,8 @@ export class AuthService {
       user: {
         id: user.id,
         email: user.email,
-        businessName: user.businessName
+        businessName: user.businessName,
+        role: user.role ?? undefined,
       }
     };
   }

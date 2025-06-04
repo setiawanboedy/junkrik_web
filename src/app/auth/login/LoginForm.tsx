@@ -66,7 +66,7 @@ export default function LoginForm() {
 
   return (
     <FormContainer
-      title="Login Bisnis Junkrik"
+      title="Login Junkrik"
       subtitle="Masuk untuk mengelola pengumpulan sampah bisnis Anda"
       onSubmit={handleSubmit(onSubmit)}
     >

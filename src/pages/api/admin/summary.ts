@@ -18,7 +18,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Reward pending
     const rewardPending = await prisma.rewardHistory.count({ where: { status: 'PENDING' } });
     // User aktif
-    const activeUsers = await prisma.user.count();
+    const activeUsers = await prisma.user.count({
+      where: {
+        OR: [
+          { role: 'business' },
+        ],
+      },
+    });
     // Volume sampah bulan ini
     const wasteVolumeThisMonth = await prisma.pickup.aggregate({
       _sum: { estimatedWeight: true },
