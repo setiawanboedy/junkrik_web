@@ -229,7 +229,7 @@ export const SubmitButton: React.FC<SubmitButtonProps> = ({
   size = 'md',
   className = '',
 }) => {
-  const baseClasses = 'font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors';
+  const baseClasses = 'font-medium cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors';
   
   const variantClasses = {
     primary: 'bg-green-600 text-white hover:bg-green-700 focus:ring-green-500',

@@ -103,7 +103,7 @@ export default function LoginForm() {
       <div className="text-center">
         <p className="text-sm text-gray-600">
           Belum punya akun?{' '}
-          <a href="/auth/register" className="font-medium text-green-600 hover:text-green-500">
+          <a href="/auth/register" className="font-medium cursor-pointer text-green-600 hover:text-green-500">
             Daftar di sini
           </a>
         </p>
