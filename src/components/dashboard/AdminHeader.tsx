@@ -7,6 +7,7 @@ import { useLogout } from '@/hooks/useLogout';
 const adminMenu = [
   { href: '/admin', label: 'Dashboard', icon: '🏠' },
   { href: '/admin/pickups', label: 'Pickup', icon: '🚚' },
+  { href: '/admin/drivers', label: 'Drivers', icon: '🚚' },
   { href: '/admin/reward', label: 'Approval Reward', icon: '🎁' },
   { href: '/admin/users', label: 'User/Bisnis', icon: '👤' },
   { href: '/admin/reports', label: 'Laporan', icon: '📊' },
