@@ -19,7 +19,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!user) {
       return res.status(401).json(createErrorResponse('USER_NOT_FOUND', 'User not found'));
     }
-    return res.status(200).json({ user });
+    return res.status(200).json({ data: { user } });
   } catch (error) {
     return res.status(500).json(createErrorResponse('INTERNAL_ERROR', 'Internal server error '+ error));
   }

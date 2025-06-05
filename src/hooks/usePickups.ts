@@ -25,7 +25,11 @@ export interface Pickup {
   };
 }
 
-export function usePickups(statusFilter: string) {
+export function usePickups(
+  statusFilter: string,
+  startDate?: string,
+  endDate?: string
+) {
   const [pickups, setPickups] = useState<Pickup[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -34,6 +38,8 @@ export function usePickups(statusFilter: string) {
     try {
       const params: any = {};
       if (statusFilter) params.status = statusFilter;
+      if (startDate) params.startDate = startDate;
+      if (endDate) params.endDate = endDate;
       const response = await api.get('/pickups', { params });
       setPickups(response.data.data || []);
     } catch (err: any) {
@@ -41,7 +47,7 @@ export function usePickups(statusFilter: string) {
     } finally {
       setLoading(false);
     }
-  }, [statusFilter]);
+  }, [statusFilter, startDate, endDate]);
 
   useEffect(() => {
     fetchPickups();

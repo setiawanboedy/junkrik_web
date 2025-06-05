@@ -25,8 +25,13 @@ export function useAuthUser() {
       .catch((err) => {
         if (!ignore) {
           setUser(null);
-          setError(err?.response?.data?.error?.message || 'Gagal memuat data user');
-          console.error('useAuthUser error:', err);
+          // Suppress 401 error for unauthenticated users (landing page)
+          if (err?.response?.status === 401) {
+            setError(null);
+          } else {
+            setError(err?.response?.data?.error?.message || 'Gagal memuat data user');
+            console.error('useAuthUser error:', err);
+          }
         }
       })
       .finally(() => {

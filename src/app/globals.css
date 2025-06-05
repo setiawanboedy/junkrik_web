@@ -19,6 +19,11 @@
   }
 }
 
+body, html {
+  color: #374151;
+}
+
+
 body {
   background: var(--background);
   color: var(--foreground);

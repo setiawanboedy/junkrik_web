@@ -8,6 +8,9 @@ export class PickupService {
   // Create a new pickup request
   static async createPickup(userId: string, data: CreatePickupData) {
     try {
+      // Determine status based on pickupDate
+      const requestedDate = new Date(data.pickupDate);
+      const status = requestedDate > new Date() ? 'SCHEDULED' : 'PENDING';
       // Validate schedule if provided
       if (data.scheduleId) {
         const schedule = await prisma.schedule.findFirst({
@@ -32,7 +35,7 @@ export class PickupService {
           estimatedWeight: data.estimatedWeight || null,
           specialInstructions: data.specialInstructions || null,
           address: data.address,
-          status: 'PENDING'
+          status: status
         },
         include: {
           schedule: true,
@@ -106,6 +109,19 @@ export class PickupService {
         }
       });
 
+      // Auto-transition scheduled pickups due today or earlier to pending
+      const now = new Date();
+      const startOfTomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+      const toUpdate = pickups.filter(p => p.status === 'SCHEDULED' && p.pickupDate < startOfTomorrow);
+      if (toUpdate.length > 0) {
+        await Promise.all(
+          toUpdate.map(p =>
+            prisma.pickup.update({ where: { id: p.id }, data: { status: 'PENDING' } })
+          )
+        );
+        // reflect status change in returned array
+        toUpdate.forEach(p => { p.status = 'PENDING'; });
+      }
       return pickups;
     } catch {
       throw new Error('Failed to fetch pickups');
