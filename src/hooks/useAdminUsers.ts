@@ -52,6 +52,10 @@ export function useAdminUsers() {
     return updateUser(id, { status: 'SUSPENDED' });
   };
 
+  const activateUser = async (id: string) => {
+    return updateUser(id, { status: 'ACTIVE' });
+  };
+
   const resetPassword = async (id: string) => {
     setLoading(true);
     setError(null);
@@ -68,5 +72,5 @@ export function useAdminUsers() {
 
   useEffect(() => { fetchUsers(); }, []);
 
-  return { users, loading, error, fetchUsers, updateUser, suspendUser, resetPassword };
+  return { users, loading, error, fetchUsers, updateUser, suspendUser, activateUser, resetPassword };
 }

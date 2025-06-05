@@ -103,7 +103,8 @@ export class AuthService {
         wasteType: true,
         wasteVolume: true,
         role: true,
-        createdAt: true
+        createdAt: true,
+        status: true,
       }
     });
   }

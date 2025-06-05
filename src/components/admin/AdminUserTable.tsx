@@ -8,10 +8,11 @@ interface AdminUserTableProps {
   error: string | null;
   onEdit: (userId: string, data: Partial<AdminUser>) => void;
   onSuspend: (userId: string) => void;
+  onActivate: (userId: string) => void;
   onResetPassword: (userId: string) => void;
 }
 
-export default function AdminUserTable({ users, loading, error, onEdit, onSuspend, onResetPassword }: AdminUserTableProps) {
+export default function AdminUserTable({ users, loading, error, onEdit, onSuspend, onActivate, onResetPassword }: AdminUserTableProps) {
   const [search, setSearch] = useState('');
   const [filterRole, setFilterRole] = useState('');
   const [filterWasteType, setFilterWasteType] = useState('');
@@ -101,18 +102,47 @@ export default function AdminUserTable({ users, loading, error, onEdit, onSuspen
             <tbody>
               {filteredUsers.map((u) => (
                 <tr key={u.id} className="border-b">
-                  <td className="py-2 px-2 font-semibold text-green-800">{u.businessName}</td>
+                   <td className="py-2 px-2">
+                    <span className="font-semibold text-gray-900">{u.businessName}</span>
+                    {u.status === 'SUSPENDED' && (
+                      <span className="ml-2 px-2 py-0.5 rounded bg-red-200 text-red-800 text-xs font-bold align-middle">SUSPENDED</span>
+                    )}
+                  </td>
                   <td className="py-2 px-2 text-blue-700">{u.email}</td>
                   <td className="py-2 px-2 text-gray-700">{u.phone}</td>
                   <td className="py-2 px-2 text-gray-700">{u.wasteType || <span className='text-gray-400'>-</span>}</td>
                   <td className="py-2 px-2 text-gray-700">{u.wasteVolume ? `${u.wasteVolume} kg` : <span className='text-gray-400'>-</span>}</td>
                   <td className="py-2 px-2 text-gray-700 max-w-xs truncate" title={u.address}>{u.address}</td>
                   <td className="py-2 px-2 text-gray-700">{u.role ? u.role.toUpperCase() : 'USER'}</td>
-                  <td className="py-2 px-2 flex gap-2">
-                    <button className="px-3 py-1 cursor-pointer bg-blue-600 text-white rounded hover:bg-blue-700 text-xs" onClick={() => { setEditId(u.id); setEditData(u); }}>Edit</button>
-                    <button className="px-3 py-1 cursor-pointer bg-yellow-600 text-white rounded hover:bg-yellow-700 text-xs" onClick={() => setResetId(u.id)}>Reset PW</button>
-                    <button className="px-3 py-1 cursor-pointer bg-red-600 text-white rounded hover:bg-red-700 text-xs" onClick={() => onSuspend(u.id)}>Suspend</button>
-                  </td>
+                    <td className="py-2 px-2 flex gap-2">
+                    <button
+                      className="px-3 py-1 cursor-pointer bg-blue-600 text-white rounded hover:bg-blue-700 text-xs"
+                      onClick={() => { setEditId(u.id); setEditData(u); }}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="px-3 py-1 cursor-pointer bg-yellow-600 text-white rounded hover:bg-yellow-700 text-xs"
+                      onClick={() => setResetId(u.id)}
+                    >
+                      Reset PW
+                    </button>
+                    {u.status === 'SUSPENDED' ? (
+                      <button
+                      className="px-3 py-1 cursor-pointer bg-green-600 text-white rounded hover:bg-green-700 text-xs"
+                      onClick={() => onActivate(u.id)}
+                      >
+                      Aktifkan
+                      </button>
+                    ) : (
+                      <button
+                      className="px-3 py-1 cursor-pointer bg-red-600 text-white rounded hover:bg-red-700 text-xs"
+                      onClick={() => onSuspend(u.id)}
+                      >
+                      Suspend
+                      </button>
+                    )}
+                    </td>
                 </tr>
               ))}
             </tbody>

@@ -6,7 +6,7 @@ import AdminUserTable from '@/components/admin/AdminUserTable';
 import toast from 'react-hot-toast';
 
 export default function AdminUsersPage() {
-  const { users, loading, error, updateUser, suspendUser, resetPassword } = useAdminUsers();
+  const { users, loading, error, updateUser, suspendUser, activateUser, resetPassword } = useAdminUsers();
 
   const handleEdit = useCallback(async (userId: string, data: any) => {
     const ok = await updateUser(userId, data);
@@ -19,6 +19,12 @@ export default function AdminUsersPage() {
     if (ok) toast.success('User berhasil disuspend');
     else toast.error('Gagal suspend user');
   }, [suspendUser]);
+
+  const handleActivate = useCallback(async (userId: string) => {
+    const ok = await activateUser(userId);
+    if (ok) toast.success('User berhasil diaktifkan');
+    else toast.error('Gagal aktifkan user');
+  }, [activateUser]);
 
   const handleResetPassword = useCallback(async (userId: string) => {
     const ok = await resetPassword(userId);
@@ -36,6 +42,7 @@ export default function AdminUsersPage() {
         error={error}
         onEdit={handleEdit}
         onSuspend={handleSuspend}
+        onActivate={handleActivate}
         onResetPassword={handleResetPassword}
       />
     </div>

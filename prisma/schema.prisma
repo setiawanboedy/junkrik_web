@@ -18,6 +18,7 @@ model User {
   wasteType   String?
   wasteVolume Int?
   role        String?
+  status      String   @default("ACTIVE") // ACTIVE, SUSPENDED, etc.
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   

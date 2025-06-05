@@ -7,6 +7,7 @@ export interface AuthUser {
   email: string;
   businessName: string;
   role?: string;
+  status?: string;
 }
 
 export function useAuthUser() {

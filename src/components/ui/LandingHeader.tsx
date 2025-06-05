@@ -19,12 +19,16 @@ export default function LandingHeader() {
           </div>
           <div className="flex space-x-4">
             {loading ? null : user ? (
-              <Link
-                href={user.role === 'admin' ? "/admin" : "/dashboard"}
-                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
-              >
-                Dashboard
-              </Link>
+              user.status === 'SUSPENDED' ? (
+                <span className="bg-red-100 text-red-700 px-4 py-2 rounded-lg font-semibold border border-red-300">Akun Anda disuspend</span>
+              ) : (
+                <Link
+                  href={user.role === 'admin' ? "/admin" : "/dashboard"}
+                  className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                >
+                  Dashboard
+                </Link>
+              )
             ) : (
               <Link
                 href="/auth/login"

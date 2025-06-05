@@ -15,6 +15,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         wasteVolume: true,
         role: true,
         createdAt: true,
+        status: true,
       },
       orderBy: { createdAt: 'desc' },
     });
