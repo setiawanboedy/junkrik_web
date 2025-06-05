@@ -35,6 +35,20 @@ export default function AdminDashboardSummaryClient() {
           </div>
           <div className="text-sm text-gray-400 mt-2">Total volume sampah terkelola bulan ini</div>
         </div>
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="text-lg font-semibold text-gray-700 mb-2">Upcoming Pickup</div>
+          <div className="text-5xl font-extrabold text-blue-700 tracking-tight drop-shadow-sm mb-1">
+            {loading ? '-' : data?.upcomingPickups?.toLocaleString('id-ID') ?? '-'}
+          </div>
+          <div className="text-sm text-gray-400 mt-2">Pickup terjadwal mendatang (SCHEDULED)</div>
+        </div>
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="text-lg font-semibold text-gray-700 mb-2">Total Pickup</div>
+          <div className="text-5xl font-extrabold text-purple-700 tracking-tight drop-shadow-sm mb-1">
+            {loading ? '-' : data?.totalPickups?.toLocaleString('id-ID') ?? '-'}
+          </div>
+          <div className="text-sm text-gray-400 mt-2">Total seluruh pickup tercatat</div>
+        </div>
       </div>
     </div>
   );

@@ -4,6 +4,8 @@ import api from '@/lib/utils/apiClient';
 
 export interface AdminDashboardSummary {
   pickupsToday: number;
+  upcomingPickups: number;
+  totalPickups: number;
   rewardPending: number;
   activeUsers: number;
   wasteVolumeThisMonth: number;

@@ -9,12 +9,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const today = new Date();
     const pickupsToday = await prisma.pickup.count({
       where: {
-        createdAt: {
-          gte: startOfDay(today),
-          lte: endOfDay(today),
-        },
+      createdAt: {
+        gte: startOfDay(today),
+        lte: endOfDay(today),
+      },
+      status: {
+        not: 'SCHEDULED',
+      },
       },
     });
+    // Upcoming pickup (pickupDate >= hari ini, status SCHEDULED/PENDING)
+    const upcomingPickups = await prisma.pickup.count({
+      where: {
+        pickupDate: {
+          gte: startOfDay(today),
+        },
+        status: { in: ['SCHEDULED'] },
+      },
+    });
+    // Total pickup
+    const totalPickups = await prisma.pickup.count();
     // Reward pending
     const rewardPending = await prisma.rewardHistory.count({ where: { status: 'PENDING' } });
     // User aktif
@@ -39,6 +53,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     res.status(200).json({
       data: {
         pickupsToday,
+        upcomingPickups,
+        totalPickups,
         rewardPending,
         activeUsers,
         wasteVolumeThisMonth: wasteVolumeThisMonth._sum.estimatedWeight || 0,
