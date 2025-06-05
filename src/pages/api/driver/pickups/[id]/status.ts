@@ -22,7 +22,7 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
       return res.status(403).json({ success: false, error: 'Forbidden: Only driver can access this endpoint.' });
     }
     const { status } = req.body;
-    if (!status || !['ON_THE_WAY', 'ARRIVED', 'IN_PROGRESS', 'COMPLETED'].includes(status)) {
+    if (!status || !['ON_THE_WAY', 'ARRIVED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'].includes(status)) {
       return res.status(400).json({ success: false, error: 'Invalid status value' });
     }
     // Ensure pickup exists and is assigned to this driver
