@@ -51,8 +51,9 @@ export default function PickupCalendar({ pickups, onDateSelect }: PickupCalendar
         tileContent={tileContent}
         tileClassName={tileClassName}
         onClickDay={onDateSelect}
+        className="text-gray-700"
       />
-      <div className="flex flex-wrap gap-4 mt-4 text-xs items-center">
+      <div className="flex flex-wrap gap-4 mt-4 text-xs items-center text-gray-700">
         <span className="w-2 h-2 bg-green-500 rounded-full inline-block" /> <span className="mr-4 text-gray-700">Ada Pickup</span>
         <span className="px-2 py-1 rounded bg-gray-200 text-gray-700">Scheduled</span>
         <span className="px-2 py-1 rounded bg-yellow-100 text-yellow-800">Pending</span>
