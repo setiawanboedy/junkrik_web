@@ -140,6 +140,39 @@ export default function PickupForm() {
     }
   };
 
+  // Helper: get next pickup date from schedule
+  function getNextPickupDate(schedule: Schedule): string {
+    const now = new Date();
+    const today = now.getDay();
+    let daysToAdd = (schedule.dayOfWeek - today + 7) % 7;
+    if (daysToAdd === 0) {
+      // If time already passed today, set to next week
+      const [hour, minute] = schedule.time.split(':').map(Number);
+      if (now.getHours() > hour || (now.getHours() === hour && now.getMinutes() >= minute)) {
+        daysToAdd = 7;
+      }
+    }
+    const next = new Date(now);
+    next.setDate(now.getDate() + daysToAdd);
+    // Set jam dan menit persis sesuai schedule, tanpa pengaruh offset lokal
+    const [hour, minute] = schedule.time.split(':').map(Number);
+    next.setHours(hour, minute, 0, 0);
+    // Koreksi offset agar hasil toISOString sesuai jam lokal yang diinginkan
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    const local = `${next.getFullYear()}-${pad(next.getMonth() + 1)}-${pad(next.getDate())}T${pad(hour)}:${pad(minute)}`;
+    return local;
+  }
+
+  // When scheduleId changes, update pickupDate
+  useEffect(() => {
+    if (formData.scheduleId) {
+      const schedule = schedules.find(s => s.id === formData.scheduleId);
+      if (schedule) {
+        setFormData(prev => ({ ...prev, pickupDate: getNextPickupDate(schedule) }));
+      }
+    }
+  }, [formData.scheduleId, schedules]);
+
   return (
     <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6">
       <h2 className="text-2xl font-bold text-gray-900 mb-6">Request Pickup</h2>
@@ -154,20 +187,23 @@ export default function PickupForm() {
         {/* Schedule Selection */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Link to Schedule (Optional)
+            Link to Schedule (Opsional)
           </label>
           <select
             value={formData.scheduleId || ''}
             onChange={(e) => setFormData({ ...formData, scheduleId: e.target.value || undefined })}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50 text-gray-900"
           >
-            <option value="">No schedule (one-time pickup)</option>
+            <option value="">Tidak ada (pickup manual)</option>
             {schedules.map((schedule) => (
               <option key={schedule.id} value={schedule.id}>
-                {DAYS_OF_WEEK[schedule.dayOfWeek]} at {schedule.time}
+                {DAYS_OF_WEEK[schedule.dayOfWeek]} jam {schedule.time}
               </option>
             ))}
           </select>
+          <p className="text-xs text-gray-500 mt-1">
+            Pilih jadwal rutin jika ingin pickup otomatis sesuai pola. Jika tidak, isi tanggal pickup manual.
+          </p>
         </div>
 
         {/* Pickup Date */}
@@ -178,11 +214,15 @@ export default function PickupForm() {
           <input
             type="datetime-local"
             id="pickupDate"
-            value={formData.pickupDate}
+            value={formData.pickupDate ? formData.pickupDate.slice(0, 16) : ''}
             onChange={(e) => setFormData({ ...formData, pickupDate: e.target.value })}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50 text-gray-900"
             required
+            readOnly={!!formData.scheduleId}
           />
+          {formData.scheduleId && (
+            <p className="text-xs text-blue-600 mt-1">Tanggal pickup otomatis mengikuti jadwal rutin yang dipilih.</p>
+          )}
         </div>
 
         {/* Waste Types */}
