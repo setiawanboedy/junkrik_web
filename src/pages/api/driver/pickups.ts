@@ -28,7 +28,6 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
           'ON_THE_WAY',
           'ARRIVED',
           'IN_PROGRESS',
-          'COMPLETED',
         ],
       },
     };
