@@ -85,30 +85,46 @@ export default function AdminPickupsClient() {
                   </span>
                 </td>
                 <td className="px-4 py-3">
-                  {/* Tombol aksi (approve, assign, dsb) */}
+                  {/* Tombol aksi (approve, on the way, arrived, dsb) */}
                   {p.status === 'PENDING' && (
-                    <button
-                      className="px-3 py-1 cursor-pointer bg-blue-600 text-white rounded hover:bg-blue-700 text-sm mr-2"
-                      onClick={() => updatePickupStatus(p.id, 'IN_PROGRESS')}
-                    >
-                      Approve
-                    </button>
+                  <button
+                    className="px-3 py-1 cursor-pointer bg-blue-600 text-white rounded hover:bg-blue-700 text-sm mr-2"
+                    onClick={() => updatePickupStatus(p.id, 'ON_THE_WAY')}
+                  >
+                    Approve
+                  </button>
+                  )}
+                  {p.status === 'ON_THE_WAY' && (
+                  <button
+                    className="px-3 py-1 cursor-pointer bg-indigo-600 text-white rounded hover:bg-indigo-700 text-sm mr-2"
+                    onClick={() => updatePickupStatus(p.id, 'ARRIVED')}
+                  >
+                    Arrived
+                  </button>
+                  )}
+                  {p.status === 'ARRIVED' && (
+                  <button
+                    className="px-3 py-1 cursor-pointer bg-yellow-600 text-white rounded hover:bg-yellow-700 text-sm mr-2"
+                    onClick={() => updatePickupStatus(p.id, 'IN_PROGRESS')}
+                  >
+                    Mulai Pickup
+                  </button>
                   )}
                   {p.status === 'IN_PROGRESS' && (
-                    <button
-                      className="px-3 py-1 cursor-pointer bg-green-600 text-white rounded hover:bg-green-700 text-sm mr-2"
-                      onClick={() => updatePickupStatus(p.id, 'COMPLETED')}
-                    >
-                      Selesai
-                    </button>
+                  <button
+                    className="px-3 py-1 cursor-pointer bg-green-600 text-white rounded hover:bg-green-700 text-sm mr-2"
+                    onClick={() => updatePickupStatus(p.id, 'COMPLETED')}
+                  >
+                    Selesai
+                  </button>
                   )}
                   {p.status !== 'COMPLETED' && p.status !== 'CANCELLED' && (
-                    <button
-                      className="px-3 py-1 cursor-pointer bg-red-600 text-white rounded hover:bg-red-700 text-sm"
-                      onClick={() => updatePickupStatus(p.id, 'CANCELLED')}
-                    >
-                      Batalkan
-                    </button>
+                  <button
+                    className="px-3 py-1 cursor-pointer bg-red-600 text-white rounded hover:bg-red-700 text-sm"
+                    onClick={() => updatePickupStatus(p.id, 'CANCELLED')}
+                  >
+                    Batalkan
+                  </button>
                   )}
                 </td>
               </tr>

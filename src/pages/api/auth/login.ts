@@ -21,8 +21,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       `token=${result.token}; Path=/; HttpOnly; SameSite=${isProd ? 'None' : 'Lax'};${isProd ? ' Secure;' : ''} Max-Age=604800`,
       `role=${result.user.role}; Path=/; SameSite=${isProd ? 'None' : 'Lax'};${isProd ? ' Secure;' : ''} Max-Age=604800`
     ]);
-    // Log debug
-    console.log('[DEBUG] Set-Cookie header:', res.getHeader('Set-Cookie'));
 
     // Return success response (jangan kirim token di body untuk keamanan)
     res.status(200).json(createSuccessResponse({ user: result.user }, 'Login successful'));

@@ -15,9 +15,7 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
     // Ambil semua pickup yang diassign driver dan jadwalnya di masa depan (status PENDING)
     const upcomingPickups = await prisma.pickup.findMany({
       where: {
-        driverId: req.user.id,
-        status: 'PENDING',
-        pickupDate: { gt: new Date() },
+        status: 'SCHEDULED',
       },
       include: {
         user: { select: { businessName: true, address: true, phone: true } },

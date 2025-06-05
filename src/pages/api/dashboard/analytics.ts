@@ -4,20 +4,9 @@ import { PickupService } from '@/lib/services/pickup.service';
 import { ScheduleService } from '@/lib/services/schedule.service';
 import { withAuth, AuthenticatedRequest } from '@/lib/middleware/auth';
 import { validateMethod, handleApiError, createSuccessResponse } from '@/lib/utils/api';
-import { verifyToken } from '@/lib/jwt';
 
 async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
   // Debug: log token dari cookie (bukan header)
-  const token = req.cookies?.token;
-  console.log('[DEBUG] /api/dashboard/analytics token (cookie):', token);
-  if (token) {
-    try {
-      const decoded = verifyToken(token);
-      console.log('[DEBUG] /api/dashboard/analytics decoded:', decoded);
-    } catch (e) {
-      console.log('[DEBUG] JWT verify error:', e);
-    }
-  }
 
   // Validate HTTP method
   if (!validateMethod(req, res, ['GET'])) {

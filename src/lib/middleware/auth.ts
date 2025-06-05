@@ -25,9 +25,6 @@ export function withAuth(
       } else if ('cookies' in req && req.cookies && req.cookies.token) {
         token = req.cookies.token;
       }
-      // Debug: log token
-      console.log('[DEBUG] withAuth token:', token);
-      // If no token, return 401
       if (!token) {
         return res.status(401).json(createErrorResponse(
           'AUTH_TOKEN_REQUIRED',
@@ -36,7 +33,6 @@ export function withAuth(
       }
       // Verify token
       const decoded = verifyToken(token) as any;
-      console.log('[DEBUG] withAuth decoded:', decoded);
       if (!decoded || !decoded.id) {
         return res.status(401).json(createErrorResponse(
           'INVALID_OR_EXPIRED_TOKEN',
