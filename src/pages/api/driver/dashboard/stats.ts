@@ -13,9 +13,9 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
     return res.status(403).json({ success: false, error: 'Forbidden' });
   }
   // count today's pickups
-  const todayCount = await prisma.pickup.count({ where: { driverId: req.user.id, pickupDate: { gte: startOfToday(), lte: endOfToday() } } });
+  const todayCount = await prisma.pickup.count({ where: { pickupDate: { gte: startOfToday(), lte: endOfToday() } } });
   // count week's pickups
-  const weekCount = await prisma.pickup.count({ where: { driverId: req.user.id, pickupDate: { gte: startOfWeek(new Date()), lte: endOfWeek(new Date()) } } });
+  const weekCount = await prisma.pickup.count({ where: { pickupDate: { gte: startOfWeek(new Date()), lte: endOfWeek(new Date()) } } });
   return res.status(200).json(createSuccessResponse({ todayCount, weekCount }));
 }
 

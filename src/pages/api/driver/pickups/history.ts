@@ -19,7 +19,6 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
     // NOTE: If driverId is not in Pickup schema, adjust this filter as needed
     const pickups = await prisma.pickup.findMany({
       where: {
-        // driverId: req.user.id, // Uncomment if driverId exists in schema
         status: { in: ['COMPLETED', 'CANCELLED'] },
       },
       include: {

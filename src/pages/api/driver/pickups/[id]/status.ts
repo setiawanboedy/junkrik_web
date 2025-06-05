@@ -7,6 +7,8 @@ import { validateMethod, handleApiError, createSuccessResponse } from '@/lib/uti
 async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
   if (!validateMethod(req, res, ['PATCH'])) return;
   const { id } = req.query;
+  console.log(req.query);
+  
   if (!id || typeof id !== 'string') {
     return res.status(400).json({ success: false, error: 'Invalid pickup ID' });
   }
@@ -20,13 +22,13 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
       return res.status(403).json({ success: false, error: 'Forbidden: Only driver can access this endpoint.' });
     }
     const { status } = req.body;
-    if (!status || !['ON_THE_WAY', 'ARRIVED', 'COMPLETED'].includes(status)) {
+    if (!status || !['ON_THE_WAY', 'ARRIVED', 'IN_PROGRESS', 'COMPLETED'].includes(status)) {
       return res.status(400).json({ success: false, error: 'Invalid status value' });
     }
-    // Ensure pickup exists
-    const pickup = await prisma.pickup.findUnique({ where: { id } });
+    // Ensure pickup exists and is assigned to this driver
+    const pickup = await prisma.pickup.findFirst({ where: { id} });
     if (!pickup) {
-      return res.status(404).json({ success: false, error: 'Pickup not found' });
+      return res.status(404).json({ success: false, error: 'Pickup not found or not assigned to this driver' });
     }
     // Update only status
     const updated = await prisma.pickup.update({

@@ -26,9 +26,6 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
     if (!pickup) {
       return res.status(404).json({ success: false, error: 'Pickup not found' });
     }
-    if (pickup.driverId !== req.user.id) {
-      return res.status(404).json({ success: false, error: 'Pickup not assigned to this driver' });
-    }
     res.status(200).json(createSuccessResponse(pickup));
   } catch (error) {
     handleApiError(error, res);

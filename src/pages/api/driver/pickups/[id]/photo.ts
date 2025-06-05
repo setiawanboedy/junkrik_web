@@ -32,9 +32,6 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
     if (!pickup) {
       return res.status(404).json({ success: false, error: 'Pickup not found' });
     }
-    if (pickup.driverId !== req.user.id) {
-      return res.status(404).json({ success: false, error: 'Pickup not assigned to this driver' });
-    }
     const form = new formidable.IncomingForm();
     form.uploadDir = path.join(process.cwd(), 'public', 'uploads');
     form.keepExtensions = true;
