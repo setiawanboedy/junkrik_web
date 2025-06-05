@@ -20,12 +20,12 @@ export function useAuthUser() {
     setError(null);
     api.get('/auth/me')
       .then(res => {
-        if (!ignore) setUser(res.data.user);
+        if (!ignore) setUser(res.data.data.user);
       })
       .catch((err) => {
         if (!ignore) {
           setUser(null);
-          setError(err?.response?.data?.error || 'Gagal memuat data user');
+          setError(err?.response?.data?.error?.message || 'Gagal memuat data user');
           console.error('useAuthUser error:', err);
         }
       })

@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { verifyToken } from '@/lib/jwt';
 import { AuthService } from '@/lib/services/auth.service';
-import { createErrorResponse, createSuccessResponse } from '@/lib/utils/api';
+import { createErrorResponse } from '@/lib/utils/api';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
@@ -20,6 +21,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
     return res.status(200).json({ user });
   } catch (error) {
-    return res.status(500).json(createErrorResponse('INTERNAL_ERROR', 'Internal server error'));
+    return res.status(500).json(createErrorResponse('INTERNAL_ERROR', 'Internal server error '+ error));
   }
 }
