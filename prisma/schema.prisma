@@ -54,7 +54,7 @@ model Pickup {
   wasteTypes          String[] // ['PLASTIC', 'ORGANIC', 'PAPER', 'METAL', 'GLASS', 'MIXED']
   estimatedWeight     Float?   // kg
   actualWeight        Float?   // kg  
-  status              String   @default("PENDING") // PENDING, CONFIRMED, IN_PROGRESS, COMPLETED, CANCELLED
+  status              String   @default("PENDING") // PENDING, CONFIRMED, IN_PROGRESS, COMPLETED, CANCELLED, MISSED
   address             Json     // {street, city, postalCode, notes}
   specialInstructions String?
   photoUrl            String?   // URL of uploaded photo

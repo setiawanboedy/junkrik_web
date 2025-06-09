@@ -15,11 +15,21 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
     if (!user || user.role !== 'driver') {
       return res.status(403).json({ success: false, error: 'Forbidden: Only driver can access this endpoint.' });
     }
-    // Ambil pickup yang sudah selesai/cancel untuk driver ini
-    // NOTE: If driverId is not in Pickup schema, adjust this filter as needed
+    // Auto-transition PENDING/SCHEDULED sebelum hari ini jadi MISSED
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    await prisma.pickup.updateMany({
+      where: {
+        pickupDate: { lt: startOfToday },
+        status: { in: ['PENDING', 'SCHEDULED'] },
+      },
+      data: { status: 'MISSED' },
+    });
+    // Ambil pickup yang sudah selesai/cancel/missed untuk driver ini
     const pickups = await prisma.pickup.findMany({
       where: {
-        status: { in: ['COMPLETED', 'CANCELLED'] },
+        driverId: req.user.id,
+        status: { in: ['COMPLETED', 'CANCELLED', 'MISSED'] },
       },
       include: {
         user: { select: { businessName: true, address: true } },
