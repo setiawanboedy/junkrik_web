@@ -28,7 +28,6 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
     // Ambil pickup yang sudah selesai/cancel/missed untuk driver ini
     const pickups = await prisma.pickup.findMany({
       where: {
-        driverId: req.user.id,
         status: { in: ['COMPLETED', 'CANCELLED', 'MISSED'] },
       },
       include: {
@@ -36,6 +35,7 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
       },
       orderBy: { pickupDate: 'desc' },
     });
+    
     res.status(200).json(createSuccessResponse(pickups));
   } catch (error) {
     handleApiError(error, res);
