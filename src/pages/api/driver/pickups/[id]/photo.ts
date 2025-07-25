@@ -2,10 +2,9 @@ import type { NextApiResponse } from 'next';
 import { withAuth, AuthenticatedRequest } from '@/lib/middleware/auth';
 import prisma from '@/lib/prisma';
 import { validateMethod, handleApiError, createSuccessResponse } from '@/lib/utils/api';
-// @ts-expect-error missing type declarations for formidable
-import formidable from 'formidable';
 import fs from 'fs';
 import path from 'path';
+import formidable from 'formidable';
 
 // Disable Next.js default body parser
 export const config = {
@@ -32,13 +31,14 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
     if (!pickup) {
       return res.status(404).json({ success: false, error: 'Pickup not found' });
     }
-    const form = new formidable.IncomingForm();
-    form.uploadDir = path.join(process.cwd(), 'public', 'uploads');
-    form.keepExtensions = true;
-    if (!fs.existsSync(form.uploadDir)) {
-      fs.mkdirSync(form.uploadDir, { recursive: true });
+    const uploadDir = path.join(process.cwd(), 'public', 'uploads');
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const form = new formidable.IncomingForm({
+      uploadDir,
+      keepExtensions: true,
+    });
     form.parse(req, async (err: any, fields: any, files: any) => {
       if (err) {
         return res.status(500).json({ success: false, error: 'File upload error' });

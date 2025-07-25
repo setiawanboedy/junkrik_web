@@ -17,7 +17,6 @@ export function useSchedules() {
 
   useEffect(() => {
     fetchSchedules();
-    // eslint-disable-next-line
   }, []);
 
   const fetchSchedules = async () => {

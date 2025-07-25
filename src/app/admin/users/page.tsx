@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 import React, { useCallback } from 'react';
 import { useAdminUsers } from '@/hooks/useAdminUsers';

@@ -1,4 +1,5 @@
 import { Reward } from '@/hooks/useRewards';
+import Image from 'next/image';
 
 interface RewardListProps {
   rewards: Reward[];
@@ -23,7 +24,15 @@ export default function RewardList({ rewards, credit, loading, error, onRedeem }
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {rewards.map(r => (
             <div key={r.id} className="bg-gray-50 rounded-xl shadow p-4 flex flex-col items-center">
-              {r.imageUrl && <img src={r.imageUrl} alt={r.name} className="w-20 h-20 object-contain mb-2" />}
+              {r.imageUrl && (
+                <Image
+                  src={r.imageUrl}
+                  alt={r.name}
+                  width={80}
+                  height={80}
+                  className="w-20 h-20 object-contain mb-2"
+                />
+              )}
               <div className="font-bold text-lg text-gray-900 mb-1">{r.name}</div>
               <div className="text-gray-700 text-sm mb-2 text-center">{r.description}</div>
               <div className="mb-2 text-green-700 font-semibold">{r.requiredCredit} kg kredit plastik</div>

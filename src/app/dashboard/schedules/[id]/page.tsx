@@ -7,7 +7,8 @@ export const metadata: Metadata = {
   description: 'Lihat detail jadwal pengambilan sampah.',
 };
 
-export default function ScheduleDetailPage({ params }: { params: { id: string } }) {
-  if (!params.id) return notFound();
-  return <ScheduleDetail scheduleId={params.id} />;
+export default async function ScheduleDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const {id} = await params;
+  if (!id) return notFound();
+  return <ScheduleDetail scheduleId={id} />;
 }

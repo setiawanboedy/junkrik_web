@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/hooks/useAdminDrivers.ts
 import { useEffect, useState } from 'react';
 import api from '@/lib/utils/apiClient';

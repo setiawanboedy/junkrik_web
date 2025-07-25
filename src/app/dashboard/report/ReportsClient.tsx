@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 import { useReports } from '@/hooks/useReports';
 import ReportList from '@/components/reports/ReportList';

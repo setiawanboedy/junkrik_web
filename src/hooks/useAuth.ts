@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // Custom hook untuk authentication logic
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';

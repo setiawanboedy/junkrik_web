@@ -1,12 +1,14 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 
-export function requireAuth() {
+export async function requireAuth() {
   // Ambil token dari cookie (bisa disesuaikan jika pakai header lain)
-  const token = cookies().get('token')?.value;
-  if (!token) {
+  const cookieStore = await cookies();
+  const token = cookieStore.get('token')?.value;
+  if (!token || token.trim() === '') {
     redirect('/auth/login');
+    return null;
   }
-  // Bisa tambahkan validasi token di sini jika perlu (misal: jwt.verify)
+  // TODO: Tambahkan validasi token (misal: jwt.verify) jika ingin validasi lebih lanjut
   return token;
 }

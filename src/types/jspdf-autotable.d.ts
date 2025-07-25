@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // TypeScript declaration for jsPDF autotable plugin
 import 'jspdf';
 

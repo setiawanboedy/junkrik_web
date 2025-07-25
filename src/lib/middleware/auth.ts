@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextApiRequest, NextApiResponse } from 'next';
 import { verifyToken } from '@/lib/jwt';
 import { AuthService } from '@/lib/services/auth.service';

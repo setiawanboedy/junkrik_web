@@ -7,8 +7,9 @@ export const metadata: Metadata = {
   description: 'Lihat detail permintaan pickup Anda.',
 };
 
-export default function PickupDetailPage({ params }: { params: { id: string } }) {
+export default async function PickupDetailPage({ params }: { params: Promise<{ id: string }> }) {
   // Komponen PickupDetail akan fetch data sendiri via usePickupDetail
-  if (!params.id) return notFound();
-  return <PickupDetail pickupId={params.id} />;
+  const {id} = await params
+  if (!id) return notFound();
+  return <PickupDetail pickupId={id} />;
 }
