@@ -7,10 +7,10 @@ export interface ReportSummary {
   id: string;
   month: number;
   year: number;
-  totalPickup: number;
+  totalPickups: number;
   totalWeight: number;
   recycledWeight: number;
-  plasticCredit: number;
+  plasticCredits: number;
   createdAt: string;
 }
 
@@ -33,6 +33,8 @@ export function useReports() {
       if (filter.month) params.month = filter.month;
       if (filter.year) params.year = filter.year;
       const response = await api.get('/reports', { params });
+      console.log(response);
+      
       setReports(response.data.data || []);
     } catch (err) {
       setError((err as Error)?.message || 'Failed to fetch reports');
@@ -43,18 +45,58 @@ export function useReports() {
 
   const downloadReport = async (reportId: string) => {
     try {
-      const response = await api.get(`/reports/${reportId}/download`, { responseType: 'blob' });
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `report-${reportId}.pdf`);
-      document.body.appendChild(link);
-      link.click();
-      link.parentNode?.removeChild(link);
+      // Ambil data report dari API (bukan file PDF)
+      const response = await api.get(`/reports/${reportId}`);
+      const report = response.data.data;
+      // Import pdfmake dan font secara dinamis agar vfs selalu siap
+      const pdfMakeModule = await import('pdfmake/build/pdfmake');
+      const pdfFontsModule = await import('pdfmake/build/vfs_fonts');
+      const pdfMake = pdfMakeModule.default;
+      pdfMake.vfs = pdfFontsModule.default.vfs;
+      // Generate PDF di frontend dengan pdfmake
+      const docDefinition = {
+        content: [
+          { text: 'LAPORAN EPR PENGELOLAAN SAMPAH', style: 'header', alignment: 'center' },
+          { text: 'Sesuai Peraturan Menteri LHK No. P.75/2019', style: 'subheader', alignment: 'center', margin: [0, 0, 0, 10] },
+          { text: `Nama Bisnis: ${report.user?.businessName || ''}` },
+          { text: `Periode: ${report.month}/${report.year}` },
+          { text: `Email: ${report.user?.email || ''}`, margin: [0, 0, 0, 10] },
+          {
+            table: {
+              headerRows: 1,
+              widths: ['*', '*', '*', '*', '*', '*'],
+              body: [
+                [
+                  'Total Pickup',
+                  'Total Berat (kg)',
+                  'Berat Didaur Ulang (kg)',
+                  'Kredit Plastik (kg)',
+                  'Persentase Daur Ulang',
+                  'Penghematan Biaya (Rp)'
+                ],
+                [
+                  report.totalPickup ?? report.totalPickups ?? 0,
+                  report.totalWeight ?? 0,
+                  report.recycledWeight ?? 0,
+                  report.plasticCredits ?? report.plasticCredits ?? 0,
+                  `${report.recyclingRate ?? 0}%`,
+                  report.costSavings ?? 0
+                ]
+              ]
+            },
+            margin: [0, 10, 0, 0]
+          }
+        ],
+        styles: {
+          header: { fontSize: 16, bold: true },
+          subheader: { fontSize: 10, italics: true }
+        }
+      };
+      pdfMake.createPdf(docDefinition).download(`laporan-${report.month}-${report.year}.pdf`);
     } catch (err) {
       setError((err as Error)?.message || 'Failed to download report');
     }
   };
 
-  return { reports, loading, error, filter, setFilter, downloadReport };
+  return { reports, loading, error, filter, setFilter, downloadReport, refetch: fetchReports };
 }

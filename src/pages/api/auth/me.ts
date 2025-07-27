@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { verifyToken } from '@/lib/jwt';
 import { AuthService } from '@/lib/services/auth.service';
-import { createErrorResponse } from '@/lib/utils/api';
+import { createErrorResponse, createSuccessResponse } from '@/lib/utils/api';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
@@ -18,7 +18,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!user) {
       return res.status(401).json(createErrorResponse('USER_NOT_FOUND', 'User not found'));
     }
-    return res.status(200).json({ data: { user } });
+    return res.status(200).json(createSuccessResponse({ user }));
   } catch (error) {
     return res.status(500).json(createErrorResponse('INTERNAL_ERROR', 'Internal server error '+ error));
   }

@@ -2,7 +2,7 @@ import type { NextApiResponse } from 'next';
 import { ReportService } from '@/lib/services/report.service';
 import { withAuth, AuthenticatedRequest } from '@/lib/middleware/auth';
 import { validateMethod, handleApiError } from '@/lib/utils/api';
-import { jsPDF } from 'jspdf';
+import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 
 async function handler(req: AuthenticatedRequest, res: NextApiResponse) {

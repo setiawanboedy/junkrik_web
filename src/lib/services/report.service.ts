@@ -8,20 +8,6 @@ export class ReportService {
   // Generate a new report
   static async generateReport(userId: string, data: GenerateReportData) {
     try {
-      // Check if report already exists for this period
-      const existingReport = await prisma.report.findFirst({
-        where: {
-          userId: userId,
-          year: data.year,
-          month: data.month,
-          type: data.type
-        }
-      });
-
-      if (existingReport) {
-        throw new ValidationError(`Report for ${data.year}-${data.month} already exists`);
-      }
-
       // Calculate date range for the report
       const startDate = new Date(data.year, data.month - 1, 1);
       const endDate = new Date(data.year, data.month, 0, 23, 59, 59);
@@ -30,41 +16,56 @@ export class ReportService {
       const pickups = await prisma.pickup.findMany({
         where: {
           userId: userId,
-          status: 'COMPLETED',
+          status: "COMPLETED",
           pickupDate: {
             gte: startDate,
-            lte: endDate
-          }
-        }
+            lte: endDate,
+          },
+        },
       });
 
       // Calculate report metrics
       const totalPickups = pickups.length;
-      const totalWeight = pickups.reduce((sum, pickup) => sum + (pickup.actualWeight || 0), 0);
-      
-      // Calculate weight by waste type
+      const totalWeight = pickups.reduce(
+        (sum, pickup) => sum + (pickup.estimatedWeight || 0),
+        0
+      );
       const wasteTypeStats = pickups.reduce((stats, pickup) => {
-        pickup.wasteTypes.forEach(type => {
+        pickup.wasteTypes.forEach((type) => {
           if (!stats[type]) stats[type] = 0;
-          stats[type] += (pickup.actualWeight || 0) / pickup.wasteTypes.length;
+          stats[type] +=
+            (pickup.estimatedWeight || 0) / pickup.wasteTypes.length;
         });
         return stats;
       }, {} as Record<string, number>);
-
-      // Calculate recycling rate (assuming 70% average)
       const recycledWeight = totalWeight * 0.7;
-      const recyclingRate = totalWeight > 0 ? (recycledWeight / totalWeight) * 100 : 0;
+      const recyclingRate =
+        totalWeight > 0 ? (recycledWeight / totalWeight) * 100 : 0;
+      const plasticWeight = wasteTypeStats["PLASTIC"] || 0;
+      const plasticCredits = plasticWeight * 1;
+      const costSavings = totalWeight * 2000;
 
-      // Calculate plastic credits (1 kg plastic = 1 credit)
-      const plasticWeight = wasteTypeStats['PLASTIC'] || 0;
-      const plasticCredits = plasticWeight * 1; // 1:1 ratio
-
-      // Calculate cost savings (estimated)
-      const costSavings = totalWeight * 2000; // Rp 2,000 per kg saved
-
-      // Create report
-      const report = await prisma.report.create({
-        data: {
+      // Upsert report
+      const report = await prisma.report.upsert({
+        where: {
+          userId_year_month_type: {
+            userId: userId,
+            year: data.year,
+            month: data.month,
+            type: data.type,
+          },
+        },
+        update: {
+          totalPickups,
+          totalWeight,
+          recycledWeight,
+          recyclingRate,
+          plasticCredits,
+          costSavings,
+          wasteTypeBreakdown: wasteTypeStats,
+          generatedAt: new Date(),
+        },
+        create: {
           userId: userId,
           year: data.year,
           month: data.month,
@@ -76,23 +77,24 @@ export class ReportService {
           plasticCredits,
           costSavings,
           wasteTypeBreakdown: wasteTypeStats,
-          generatedAt: new Date()
+          generatedAt: new Date(),
         },
         include: {
           user: {
             select: {
               id: true,
               businessName: true,
-              email: true
-            }
-          }
-        }
-      });      return report;
+              email: true,
+            },
+          },
+        },
+      });
+      return report;
     } catch (error) {
       if (error instanceof ValidationError) {
         throw error;
       }
-      throw new Error('Failed to generate report');
+      throw new Error("Failed to generate report");
     }
   }
 

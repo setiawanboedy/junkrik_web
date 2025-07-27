@@ -165,9 +165,7 @@ export default function PickupList() {
                       📍 {pickup.address.street}, {pickup.address.city} {pickup.address.postalCode}
                     </p>
                   </div>
-                  <span className={`px-3 py-1 text-sm font-medium rounded-full ${STATUS_COLORS[pickup.status as keyof typeof STATUS_COLORS]}`}>
-                    {pickup.status.replace('_', ' ')}
-                  </span>
+                   <span className={`px-3 py-1 rounded-full text-xs font-semibold ${STATUS_COLORS[pickup.status as keyof typeof STATUS_COLORS] || 'bg-gray-100 text-gray-700'}`}>{pickup.status.replace('_', ' ')}</span>
                 </div>
 
                 {/* Waste Types */}

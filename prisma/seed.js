@@ -36,6 +36,19 @@ async function main() {
     },
   });
 
+    await prisma.user.upsert({
+    where: { email: 'driver@junkrik.com' },
+    update: {},
+    create: {
+      email: 'driver@junkrik.com',
+      password,
+      businessName: 'Driver Junkrik',
+      address: 'Jl. Driver No. 3',
+      phone: '081211112222',
+      role: 'driver',
+    },
+  });
+
   console.log('Seeder selesai: admin & bisnis user dibuat.');
 }
 

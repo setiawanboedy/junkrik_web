@@ -17,14 +17,26 @@ export function useDashboardData() {
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [analyticsLoading, setAnalyticsLoading] = useState(true);
   const { activities } = useRecentActivity();
+  
+  // Debug state
+  useEffect(() => {
+    console.log("Current user state:", user);
+  }, [user]);
 
   useEffect(() => {
     // Fetch user info dari backend
     const fetchUser = async () => {
       try {
         const res = await api.get('/auth/me');
-        setUser(res.data.user);
-      } catch {
+        console.log("Auth response:", res.data); // Log untuk debug
+        if (res.data && res.data.data && res.data.data.user) {
+          setUser(res.data.data.user);
+        } else {
+          console.error("User data not found in response:", res.data);
+          router.push('/auth/login');
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
         router.push('/auth/login');
       } finally {
         setLoading(false);

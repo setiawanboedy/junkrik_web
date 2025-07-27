@@ -24,8 +24,8 @@ export default function DashboardView({ user, analytics, analyticsLoading, activ
       {/* Main Content */}
       <div className="mb-10">
         <h2 className="text-3xl font-bold text-gray-900 mb-2">Dashboard Bisnis</h2>
-        <p className="text-lg text-gray-700">Selamat datang, <span className="font-semibold text-green-700">{user?.businessName}</span>!</p>
-        <p className="text-gray-500">Email: {user?.email}</p>
+        <p className="text-lg text-gray-700">Selamat datang, <span className="font-semibold text-green-700">{user?.businessName || 'Pengguna'}</span>!</p>
+        <p className="text-gray-500">Email: {user?.email || 'Loading...'}</p>
       </div>
 
       {/* Stats Cards */}
