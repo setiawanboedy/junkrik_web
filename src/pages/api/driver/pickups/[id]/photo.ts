@@ -35,7 +35,7 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
     }
-    const form = new formidable.IncomingForm({
+    const form = formidable({
       uploadDir,
       keepExtensions: true,
     });
