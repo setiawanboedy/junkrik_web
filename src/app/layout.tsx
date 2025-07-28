@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ToastProvider from "@/components/ui/ToastProvider";
+import Head from "next/head";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,6 +18,9 @@ export const metadata: Metadata = {
   title: {
     template: "%s | Junkrik",
     default: "Junkrik - Solusi Pengelolaan Sampah B2B",
+  },
+  other: {
+    'dicoding:email': 'budisetiawan.dev@gmail.com',
   },
   description: "Platform digital untuk mengelola sampah bisnis dengan sistem reward, laporan kepatuhan EPR, dan kredit plastik. Mendukung bisnis menuju keberlanjutan lingkungan.",
   keywords: ["pengelolaan sampah", "B2B", "daur ulang", "EPR", "kredit plastik", "sustainability", "waste management", "Indonesia"],
@@ -75,6 +79,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id">
+       <Head>
+        <meta name="dicoding:email" content="budisetiawan.dev@gmail.com" />
+      </Head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
